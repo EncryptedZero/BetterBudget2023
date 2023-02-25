@@ -1,31 +1,42 @@
 
 import Helper.FileHelper;
-import Tests.FileHelperTest;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
  
 public class App extends Application {
 
     Stage mStage;
-    Scene mScene1, mScene2;
+    Scene mHomeScene, mNewScene;
 
     @Override
     public void start(Stage pStage) {
         this.mStage = pStage;
 
+
+        // THINKING ABOUT TURNING EACH SCENE INTO CLASSES.
+        // WOULD PASSING IN NEXT SCENE IN CONSTRUCTOR.
         Label tScene1Label = new Label("File Already found.");
-        Button tScene1Button = new Button("Scene 2");
-        tScene1Button.setOnAction(e -> mStage.setScene(mScene2));
+        Button tScene1Button = new Button("New Scene");
+        tScene1Button.setOnAction(e -> mStage.setScene(mNewScene));
         VBox tScene1Layout = new VBox(20);
         tScene1Layout.getChildren().addAll(tScene1Label, tScene1Button);
 
+        // Creating labels
+        Label label1 = new Label("Name:");
+        TextField textField = new TextField();
+        HBox tHBNewInput1 = new HBox();
+        hb.getChildren().addAll(label1, textField);
+        hb.setSpacing(10);
+
         Label tScene2Label = new Label("File not found.");
-        Button tScene2Button = new Button("Scene 1");
-        tScene2Button.setOnAction(e -> mStage.setScene(mScene1));
+        Button tScene2Button = new Button("Home");
+        tScene2Button.setOnAction(e -> mStage.setScene(mHomeScene));
         VBox tScene2Layout = new VBox(20);
         tScene2Layout.getChildren().addAll(tScene2Label, tScene2Button);
   
@@ -34,15 +45,15 @@ public class App extends Application {
         Scene scene = new Scene(root);
         */
   
-        mScene1 = new Scene(tScene1Layout, 300, 250);
-        mScene2 = new Scene(tScene2Layout, 300, 250);
+        mHomeScene = new Scene(tScene1Layout, 300, 250);
+        mNewScene = new Scene(tScene2Layout, 300, 250);
 
         this.mStage.setTitle("Hello World!");
         if(FileHelper.dataFileExists()){
-            this.mStage.setScene(mScene1);
+            this.mStage.setScene(mHomeScene);
         }
         else{
-            this.mStage.setScene(mScene2);
+            this.mStage.setScene(mNewScene);
         }
         this.mStage.show();
     }
