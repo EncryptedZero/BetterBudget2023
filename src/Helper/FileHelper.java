@@ -25,9 +25,11 @@ public class FileHelper {
             JSONParser parser = new JSONParser();
             jsonObject = (JSONObject) parser.parse(reader);
             System.out.println("File Successfully Read.");
+            System.out.println("");
         } 
         catch (IOException | ParseException e) {
             System.out.println("File Unsuccessfully Read.");
+            System.out.println("");
         }
         return jsonObject;
     }
@@ -41,9 +43,11 @@ public class FileHelper {
         try (FileWriter file = new FileWriter(FILENAME)) {
             file.write(jsonObject.toJSONString());
             System.out.println("File Successfully Wrote.");
+            System.out.println("");
         } 
         catch (IOException e) {
             System.out.println("File Unsuccessfully Wrote.");
+            System.out.println("");
         }
     }
 
