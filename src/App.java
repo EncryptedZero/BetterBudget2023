@@ -31,8 +31,8 @@ public class App extends Application {
         Label label1 = new Label("Name:");
         TextField textField = new TextField();
         HBox tHBNewInput1 = new HBox();
-        hb.getChildren().addAll(label1, textField);
-        hb.setSpacing(10);
+        tHBNewInput1.getChildren().addAll(label1, textField);
+        tHBNewInput1.setSpacing(10);
 
         Label tScene2Label = new Label("File not found.");
         Button tScene2Button = new Button("Home");
