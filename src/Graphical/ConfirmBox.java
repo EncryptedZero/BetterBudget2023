@@ -13,7 +13,7 @@ import javafx.stage.Stage;
  */
 public class ConfirmBox {
 
-    public static boolean mConfirmed;
+    public static boolean Confirmed;
     
     public static void display(String pTitle, String pMessage){
         Stage mStage = new Stage();
@@ -27,12 +27,12 @@ public class ConfirmBox {
 
         Button mYesButton = new Button("Yes");
         mYesButton.setOnAction(e -> {
-            mConfirmed = true;
+            Confirmed = true;
             mStage.close();
         });
         Button mNoButton = new Button("No");
         mNoButton.setOnAction(e -> {
-            mConfirmed = false;
+            Confirmed = false;
             mStage.close();
         });
 
