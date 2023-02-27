@@ -1,12 +1,14 @@
 package User;
 
+import Helper.GeneralHelper;
+
 public class Budget {
     private String mCategory;
     private double mBudgeted;
     private double mSpent;
 
     public Budget(String pCategory, double pBudgeted, double pSpent) {
-        this.mCategory = pCategory;
+        this.mCategory = GeneralHelper.cleanCategoryString(pCategory);
         this.mBudgeted = pBudgeted;
         this.mSpent = pSpent;
     }
@@ -39,7 +41,7 @@ public class Budget {
     }
 
     public void setCategory(String pCategory) {
-        this.mCategory = pCategory;
+        this.mCategory = GeneralHelper.cleanCategoryString(pCategory);
     }
 
     public double getBudgeted() {

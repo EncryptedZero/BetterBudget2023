@@ -1,9 +1,14 @@
 package Scenes;
 
+import Graphical.AlertBox;
+import Helper.FileHelper;
+import User.Account;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 /**
  * This should be the one of the most complex classes of our program.
@@ -29,24 +34,52 @@ import javafx.scene.layout.VBox;
  */
 public class HomeScene extends AbstractScene{
 
-    public HomeScene(Scene pNextScene){
-        super(pNextScene);
-        initialize();
+    private Account mAccount = Account.getInstance();
+
+    private static final HomeScene INSTANCE = new HomeScene();
+
+    protected HomeScene(){
+        super();
     }
 
-    public HomeScene(){
-        super();
-        initialize();
+    public static synchronized HomeScene getInstance() {
+        return INSTANCE;
     }
 
     @Override
-    protected void initialize() {
-        Label tScene1Label = new Label("File Already found.");
-        Button tScene1Button = new Button("New Scene");
-        VBox tScene1Layout = new VBox(20);
-        tScene1Layout.getChildren().addAll(tScene1Label, tScene1Button);
+    public Stage initialize(Stage pStage) {
+        Label cAccountNameLabel = new Label("Account Name: " + mAccount.getName());
+        Label cAccountNumberLabel = new Label("Account Number: " + mAccount.getAccountNumber());
+        Label cAccountBalanceLabel;
+        try{
+            cAccountBalanceLabel = new Label("Account Name: " + mAccount.getBalance());
+        }
+        catch(Exception e){
+            cAccountBalanceLabel = new Label("Add transactions to see balance.");
+        } 
 
-        Scene tTempScene = new Scene(tScene1Layout);
+        VBox cSceneLeftLayout = new VBox(20);
+        cSceneLeftLayout.getChildren().addAll(cAccountNameLabel, cAccountNumberLabel, cAccountBalanceLabel, getSaveButton());
+
+        VBox cSceneRightLayout = new VBox(20);
+
+        // This is testing for now
+        cSceneRightLayout.getChildren().addAll(cAccountNameLabel, cAccountNumberLabel, cAccountBalanceLabel, getSaveButton());
+
+        HBox cSceneFullLayout = new HBox(20);
+        cSceneFullLayout.getChildren().addAll(cSceneLeftLayout, cSceneRightLayout);
+
+        Scene tTempScene = new Scene(cSceneFullLayout, getScreenWidth(), getScreenHeight());
         setCurrentScene(tTempScene);
+        return pStage;
+    }
+
+    private Button getSaveButton(){
+        Button cSaveButton = new Button("Save");
+        cSaveButton.setOnAction(e -> {
+            FileHelper.writeJSONFile(mAccount.toJSONObject());
+            AlertBox.display("Saved", "Data has been saved");
+        });
+        return cSaveButton;
     }
 }

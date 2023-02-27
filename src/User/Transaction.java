@@ -1,5 +1,7 @@
 package User;
 
+import Helper.GeneralHelper;
+
 /**
  * This is a class to represent a transaction.
  */
@@ -13,7 +15,8 @@ public class Transaction {
     public Transaction(String pDate, String pPayee, String pCategory, String pNote, double pAmount) {
         this.mDate = pDate;
         this.mPayee = pPayee;
-        this.mCategory = pCategory;
+        // Cleaning up catgeory
+        this.mCategory = GeneralHelper.cleanCategoryString(pCategory);
         this.mNote = pNote;
         this.mAmount = pAmount;
     }
@@ -84,7 +87,7 @@ public class Transaction {
     }
 
     public void setCategory(String pCategory) {
-        this.mCategory = pCategory;
+        this.mCategory = GeneralHelper.cleanCategoryString(pCategory);
     }
 
     public String getNote() {

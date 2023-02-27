@@ -7,31 +7,30 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import Helper.GeneralHelper;
+
+/**
+ * A class to represent the users account. Is singleton for now, if more accounts are allowed change it.
+ */
 public class Account {
     private String mName;
     private int mAccountNumber;
     private List<Transaction> mTransactions = new ArrayList<Transaction>();
     private List<Budget> mBudgets = new ArrayList<Budget>();
     
-    
-    public Account(){
-        //Do nothing... can debate
+    private static Account single_instance = null;
+  
+    // Static method
+    // Static method to create instance of Singleton class
+    public static Account getInstance()
+    {
+        if (single_instance == null)
+            single_instance = new Account();
+  
+        return single_instance;
     }
 
-    public Account(String pName, int pAccountNumber, List<Transaction> pTransactions, List<Budget> pBudgets) {
-        this.mName = pName;
-        this.mAccountNumber = pAccountNumber;
-
-        this.mTransactions.clear();
-        for(Transaction tTransaction: pTransactions){
-            mTransactions.add(tTransaction);
-        }
-
-        this.mBudgets.clear();
-        for(Budget tBudget: pBudgets){
-            mBudgets.add(tBudget);
-        }
-    }
+    private Account(){}
 
     /**
      * Primarily for testing. 
@@ -118,7 +117,7 @@ public class Account {
     public Double getBalanceByCategory(String pCategory){
         Double tSum = 0.0;
         for(Transaction tTransaction: mTransactions){
-            if(pCategory.trim().toLowerCase().equals(tTransaction.getCategory().trim().toLowerCase())){
+            if(GeneralHelper.cleanCategoryString(pCategory).equals(tTransaction.getCategory())){
                 tSum += tTransaction.getAmount();
             }
         }
