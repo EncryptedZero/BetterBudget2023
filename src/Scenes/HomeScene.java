@@ -8,7 +8,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 /**
  * This should be the one of the most complex classes of our program.
@@ -47,12 +46,18 @@ public class HomeScene extends AbstractScene{
     }
 
     @Override
-    public Stage initialize(Stage pStage) {
+    public void initialize() {
         Label cAccountNameLabel = new Label("Account Name: " + mAccount.getName());
         Label cAccountNumberLabel = new Label("Account Number: " + mAccount.getAccountNumber());
         Label cAccountBalanceLabel;
         try{
-            cAccountBalanceLabel = new Label("Account Name: " + mAccount.getBalance());
+            double tAccountBalance = mAccount.getBalance();
+            if(tAccountBalance < 0){
+                cAccountBalanceLabel = new Label("Account Balance: -$" + Math.abs(mAccount.getBalance()));
+            }
+            else{       
+                cAccountBalanceLabel = new Label("Account Balance: $" + mAccount.getBalance());
+            }
         }
         catch(Exception e){
             cAccountBalanceLabel = new Label("Add transactions to see balance.");
@@ -71,7 +76,6 @@ public class HomeScene extends AbstractScene{
 
         Scene tTempScene = new Scene(cSceneFullLayout, getScreenWidth(), getScreenHeight());
         setCurrentScene(tTempScene);
-        return pStage;
     }
 
     private Button getSaveButton(){

@@ -5,26 +5,24 @@ import Graphical.AlertBox;
 import Helper.FileHelper;
 import Scenes.HomeScene;
 import Scenes.NewAccountScene;
+import Stages.MainStage;
 import User.Account;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
  
 public class App extends Application {
-
-    Stage mStage;
     NewAccountScene mNewScene = NewAccountScene.getInstance();
     Scene tNewScene;
     HomeScene tHomeScene = HomeScene.getInstance();
 
     @Override
     public void start(Stage pStage) {
-        this.mStage = mNewScene.initialize(mStage);
+        MainStage.getInstance().setStage(pStage);
+        mNewScene.initialize();
         tNewScene = mNewScene.getCurrentScene();
-        this.mStage = pStage;
-
         CalculateStartingScene();
-        this.mStage.show();
+        MainStage.getInstance().show();
     }
  
     public void CalculateStartingScene(){
@@ -44,18 +42,18 @@ public class App extends Application {
                 // Make sure this logic is set after user creates new account as well.
                 tAccount.SetUserAccountFromJSONObject(tTempObject);
 
-                this.mStage = tHomeScene.initialize(mStage);
+                tHomeScene.initialize();
 
                 // If that works then set scene
-                this.mStage.setScene(tHomeScene.getCurrentScene());
+                MainStage.getInstance().setScene(tHomeScene.getCurrentScene());
             }
             catch(Exception e){
                 AlertBox.display("Error", "Error reading file, a new account will need to be made.");
-                this.mStage.setScene(tNewScene);
+                MainStage.getInstance().setScene(tNewScene);
             }
         }
         else{
-            this.mStage.setScene(tNewScene);
+            MainStage.getInstance().setScene(tNewScene);
         }
     }
  public static void main(String[] args) {

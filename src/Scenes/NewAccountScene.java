@@ -1,6 +1,7 @@
 package Scenes;
 
 import Graphical.AlertBox;
+import Stages.MainStage;
 import User.Account;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -8,7 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 /*
  * Just want to make an introduction, and get a users account name and number.
@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 public class NewAccountScene extends AbstractScene{
 
         private Account mAccount = Account.getInstance();
+        private MainStage mMainStage = MainStage.getInstance();
     
         private static final NewAccountScene INSTANCE = new NewAccountScene();
 
@@ -28,7 +29,7 @@ public class NewAccountScene extends AbstractScene{
         }
 
         @Override
-        public Stage initialize(Stage pStage) {
+        public void initialize() {
             // Create a VBox container with some padding
             VBox vbox = new VBox();
             vbox.setPadding(new Insets(10));
@@ -64,8 +65,11 @@ public class NewAccountScene extends AbstractScene{
                     int number = Integer.parseInt(numberText);
                     mAccount.setAccountNumber(number);
                     mAccount.setName(name);
-                    pStage.setScene(HomeScene.getInstance().getCurrentScene());
-                    
+                    HomeScene.getInstance().initialize();
+                    MainStage.getInstance().setScene(HomeScene.getInstance().getCurrentScene());
+                    System.out.println("We make it this far1");
+                    MainStage.getInstance().show();
+                    System.out.println("We make it this far2");
                 }
                 catch(NumberFormatException ex) {
                     AlertBox.display("Error", "Invalid account number: " + numberText);
@@ -74,7 +78,6 @@ public class NewAccountScene extends AbstractScene{
 
             Scene tTempScene = new Scene(vbox, getScreenWidth(), getScreenHeight());
             setCurrentScene(tTempScene);
-            return pStage;
         }
     
 }

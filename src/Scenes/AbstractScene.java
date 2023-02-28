@@ -3,7 +3,6 @@ package Scenes;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
-import javafx.stage.Stage;
 
 /**
  * An abstract class to represent properties all scenes should have.
@@ -36,7 +35,7 @@ public abstract class AbstractScene{
         return this.mCurrentScene;
     }
 
-    public abstract Stage initialize(Stage pStage);
+    public abstract void initialize();
 
     protected double getScreenHeight(){
         return screenBounds.getHeight();
