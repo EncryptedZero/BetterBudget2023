@@ -4,6 +4,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -37,7 +38,9 @@ public class ConfirmBox {
         });
 
         VBox mVBox1 = new VBox(10);
-        mVBox1.getChildren().addAll(mLabelMessage, mYesButton, mNoButton);
+        HBox mHBox = new HBox(10);
+        mHBox.getChildren().addAll(mYesButton, mNoButton);
+        mVBox1.getChildren().addAll(mLabelMessage, mHBox);
         mVBox1.setAlignment(Pos.CENTER);
 
         Scene mAlertScene = new Scene(mVBox1);

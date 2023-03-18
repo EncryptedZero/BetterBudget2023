@@ -1,6 +1,6 @@
 package Tests;
 
-// Test ran, would still work if fixed up a bit but it a bit out dated now.
+// Test ran successfully, would still work if fixed up a bit but it a bit out dated now.
 public class FileHelperTest {
 
     public FileHelperTest(){

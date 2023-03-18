@@ -43,11 +43,10 @@ public class NewAccountScene extends AbstractScene{
             TextField nameField = new TextField();
             Label numberLabel = new Label("Account Number:");
             TextField numberField = new TextField();
-            vbox.getChildren().addAll(nameLabel, nameField, numberLabel, numberField);
-        
-            // Add a "Create" button to the VBox
+            
             Button createButton = new Button("Create");
-            vbox.getChildren().add(createButton);
+
+            vbox.getChildren().addAll(nameLabel, nameField, numberLabel, numberField, createButton);
         
             // Add an action listener to the "Create" button to handle errors and create the account
             createButton.setOnAction(e -> {
@@ -67,16 +66,14 @@ public class NewAccountScene extends AbstractScene{
                     mAccount.setName(name);
                     HomeScene.getInstance().initialize();
                     MainStage.getInstance().setScene(HomeScene.getInstance().getCurrentScene());
-                    System.out.println("We make it this far1");
                     MainStage.getInstance().show();
-                    System.out.println("We make it this far2");
                 }
                 catch(NumberFormatException ex) {
                     AlertBox.display("Error", "Invalid account number: " + numberText);
                 }
             });
 
-            Scene tTempScene = new Scene(vbox, getScreenWidth(), getScreenHeight());
+            Scene tTempScene = new Scene(vbox, 400, 400);
             setCurrentScene(tTempScene);
         }
     

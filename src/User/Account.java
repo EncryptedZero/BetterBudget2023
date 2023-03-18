@@ -1,13 +1,12 @@
 package User;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import Helper.GeneralHelper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * A class to represent the users account. Is singleton for now, if more accounts are allowed change it.
@@ -15,8 +14,8 @@ import Helper.GeneralHelper;
 public class Account {
     private String mName;
     private int mAccountNumber;
-    private List<Transaction> mTransactions = new ArrayList<Transaction>();
-    private List<Budget> mBudgets = new ArrayList<Budget>();
+    private ObservableList<Transaction> mTransactions = FXCollections.observableArrayList();
+    private ObservableList<Budget> mBudgets = FXCollections.observableArrayList();
     
     private static Account single_instance = null;
   
@@ -85,25 +84,33 @@ public class Account {
         this.mAccountNumber = pAccountNumber;
     }
     
-    public List<Transaction> getTransactions() {
+    public ObservableList<Transaction> getTransactions() {
         return this.mTransactions;
     }
 
-    public void setTransactions(List<Transaction> pTransactions) {
+    public void setTransactions(ObservableList<Transaction> pTransactions) {
         this.mTransactions = pTransactions;
     }
 
-    public List<Budget> getBudgets() {
+    public ObservableList<Budget> getBudgets() {
         return this.mBudgets;
     }
 
-    public void setBudgets(List<Budget> pBudgets) {
+    public void setBudgets(ObservableList<Budget> pBudgets) {
         this.mBudgets = pBudgets;
+    }
+
+    public void addTransaction(Transaction pTransaction){
+        this.mTransactions.add(pTransaction);
+    }
+
+    public void addBudget(Budget pBudget){
+        this.mBudgets.add(pBudget);
     }
 
     public Double getBalance(){
         Double tSum = 0.0;
-        for(Transaction tTransaction: mTransactions){
+        for(Transaction tTransaction: getTransactions()){
             tSum += tTransaction.getAmount();
         }
         return tSum;
@@ -175,7 +182,7 @@ public class Account {
         JSONArray transactionData = new JSONArray();
         for (Transaction tTransaction : this.mTransactions) {
             JSONObject transactionObj = new JSONObject();
-            transactionObj.put("Date", tTransaction.getDate());
+            transactionObj.put("Date", tTransaction.getDateAsString());
             transactionObj.put("Payee", tTransaction.getPayee());
             transactionObj.put("Category", tTransaction.getCategory());
             transactionObj.put("Note", tTransaction.getNote());

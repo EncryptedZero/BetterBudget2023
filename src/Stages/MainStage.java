@@ -27,4 +27,8 @@ public class MainStage {
     public void show(){
         this.mStage.show();
     }
+
+    public void closeStage(){
+        this.mStage.close();
+    }
 }

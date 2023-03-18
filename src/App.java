@@ -49,6 +49,11 @@ public class App extends Application {
             }
             catch(Exception e){
                 AlertBox.display("Error", "Error reading file, a new account will need to be made.");
+                if(FileHelper.dataFileExists()){
+                    // This fixes some how corrupted data, such as user editing data.json file
+                    FileHelper.deleteFile();
+                }
+                e.printStackTrace();
                 MainStage.getInstance().setScene(tNewScene);
             }
         }

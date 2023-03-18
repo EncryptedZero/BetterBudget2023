@@ -56,5 +56,11 @@ public class FileHelper {
         File file = new File("data.json");
         return file.exists() && !file.isDirectory();
     }
+
+    // method to delete file
+    public static void deleteFile() {
+        File file = new File("data.json");
+        file.delete();
+    }
 }
 
