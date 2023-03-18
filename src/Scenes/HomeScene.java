@@ -115,8 +115,7 @@ public class HomeScene extends AbstractScene{
                 refresh();
             }
             catch(Exception ex){
-                System.out.println(ex.getMessage());
-                System.out.println(ex.getStackTrace());
+                ex.printStackTrace();
                 AlertBox.display("Error", "An error was encountered when creating a transaction");
             }
         });
@@ -143,7 +142,8 @@ public class HomeScene extends AbstractScene{
 
             NumberAxis xAxis = new NumberAxis();
             xAxis.setLabel("Time in Years");
-            mGraph = new LineChart(yAxis, xAxis);
+            mGraph = new LineChart(xAxis, yAxis);
+            cSceneLeftLayout.getChildren().add(mGraph);
         }
 
 
@@ -168,10 +168,10 @@ public class HomeScene extends AbstractScene{
             try{
                 FileHelper.writeJSONFile(mAccount.toJSONObject());
                 AlertBox.display("Saved", "The data has been saved.");
+                refresh();
             }
             catch(Exception ex){
-                System.out.println(ex.getMessage());
-                System.out.println(ex.getStackTrace());
+                ex.printStackTrace();
                 AlertBox.display("Save Failed", "The data was unsuccessful saved. Please try again.");
             }
         });
@@ -198,7 +198,7 @@ public class HomeScene extends AbstractScene{
                     maxDate = date;
                 }
             }
-
+    
             // Determine the minimum and maximum account totals in the transactions list
             double minTotal = Double.MAX_VALUE;
             double maxTotal = Double.MIN_VALUE;
@@ -210,76 +210,110 @@ public class HomeScene extends AbstractScene{
                     maxTotal = Math.abs(t.getAmount());
                 }
             }
-
+    
             // Calculate the range of dates and the range of account totals
             Period dateRange = Period.between(minDate, maxDate);
             double totalRange = maxTotal - minTotal;
-
+    
             // Determine the appropriate tick unit for the x-axis and y-axis
             int dateTickUnit = 1;
             if (dateRange.getYears() > 100) {
                 dateTickUnit = 10;
-            } 
-            else if (dateRange.getYears() > 10) {
+            } else if (dateRange.getYears() > 10) {
                 dateTickUnit = 1;
-            } 
-            else if (dateRange.getYears() > 1) {
+            } else if (dateRange.getYears() > 1) {
                 dateTickUnit = 1;
-            } 
-            else {
-                dateTickUnit = 1;
+            } else {
+                dateTickUnit = 12;
             }
+    
+            NumberAxis yAxis = new NumberAxis();  
+            yAxis.setLabel("Account Balance");
+    
+            NumberAxis xAxis = new NumberAxis();
+            xAxis.setLabel("Time in Months");
+    
+            // Set the lower and upper bounds of the x-axis to show only the last 10 years of data
+            if (dateRange.getYears() <= 10) {
+                LocalDate lowerBound = maxDate.minusYears(10).withDayOfMonth(1);
+                LocalDate upperBound = maxDate.withDayOfMonth(1);
+                xAxis.setLowerBound(lowerBound.getYear() + lowerBound.getMonthValue() / 12.0);
+                xAxis.setUpperBound(upperBound.getYear() + upperBound.getMonthValue() / 12.0);
+                mGraph = new LineChart(xAxis, yAxis);
+            }
+            if(dateTickUnit != 12){
 
+                NumberAxis yAxis2 = new NumberAxis();  
+                yAxis2.setLabel("Account Balance");
+                
+                yAxis2.setLowerBound(minDate.getYear());
+                yAxis2.setUpperBound(maxDate.getYear() + 1); 
+            
+                NumberAxis xAxis2 = new NumberAxis();
+                xAxis2.setLabel("Time in Years");
+                mGraph = new LineChart(xAxis2, yAxis2);
+                
+            } else {
+                NumberAxis yAxis2 = new NumberAxis();  
+                yAxis2.setLabel("Account Balance");
+            
+                NumberAxis xAxis2 = new NumberAxis();
+                xAxis2.setLabel("Time in Months");
+                mGraph = new LineChart(xAxis2, yAxis2);
+            }
+            
             double totalTickUnit = 5000.0;
             if(totalRange > 1000000.0){
                 totalTickUnit = 100000.0;
-            }
-            else if (totalRange > 500000.0){
+            } else if (totalRange > 500000.0){
                 totalTickUnit = 100000.0;
-            }
-            else if (totalRange > 20000.0) {
+            } else if (totalRange > 20000.0) {
                 totalTickUnit = 5000.0;
-            } 
-            else if (totalRange > 5000.0) {
+            } else if (totalRange > 5000.0) {
                 totalTickUnit = 1000.0;
-            } 
-            else if (totalRange > 1000.0) {
+            } else if (totalRange > 1000.0) {
                 totalTickUnit = 500.0;
-            } 
-            else {
+            } else {
                 totalTickUnit = 100.0;
             }
-
+            
             // Create a series of data points for the line chart
             XYChart.Series<Number, Number> dataSeries = new XYChart.Series<>();
             double currentTotal = 0.0;
             for (Transaction t : mAccount.getTransactions()) {
                 LocalDate date = t.getDateAsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 currentTotal += t.getAmount();
-                dataSeries.getData().add(new XYChart.Data<Number, Number>(date.getYear(), currentTotal));
+                if(dateTickUnit != 12){
+                    dataSeries.getData().add(new XYChart.Data<Number, Number>(date.getYear(), currentTotal));
+                } else {
+                    dataSeries.getData().add(new XYChart.Data<Number, Number>(date.getMonthValue(), currentTotal));
+                }
             }
-
+            
             // Add the data series to the line chart
             mGraph.getData().add(dataSeries);
-
+            
             // Set the tick units for the x-axis and y-axis of the line chart
             ((NumberAxis) mGraph.getXAxis()).setTickUnit(dateTickUnit);
             ((NumberAxis) mGraph.getYAxis()).setTickUnit(totalTickUnit);
-
         }
     }
+    
 
     private void updateAccountBalance(){
         try{
-            double tAccountBalance = mAccount.getBalance();
+            double tAccountBalance = Math.round(mAccount.getBalance() * 100.00);
+            tAccountBalance = tAccountBalance / 100.00;
+
             if(tAccountBalance < 0){
-                cAccountBalanceLabel.setText("Account Balance: -$" + Math.abs(mAccount.getBalance()));
+                cAccountBalanceLabel.setText("Account Balance: -$" + Math.abs(tAccountBalance));
             }
             else{       
-                cAccountBalanceLabel.setText("Account Balance: $" + mAccount.getBalance());
+                cAccountBalanceLabel.setText("Account Balance: $" + tAccountBalance);
             }
         }
         catch(Exception e){
+            e.printStackTrace();
             cAccountBalanceLabel.setText("Account Balance: $0");
         } 
     }

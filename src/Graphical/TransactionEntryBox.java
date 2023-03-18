@@ -49,7 +49,7 @@ public class TransactionEntryBox {
         Label cYearLabel = new Label("Year:");
         TextField cYearField = new TextField();
 
-        Label cPayeeLabel = new Label("Sender or Reciever:");
+        Label cPayeeLabel = new Label("To:");
         TextField cPayeeField = new TextField();
 
         // Can be empty on submit
@@ -66,10 +66,10 @@ public class TransactionEntryBox {
         cIsPositive.setOnAction(e -> {
             mIsPositive = !mIsPositive;
             if(mIsPositive){
-                cPayeeField.setText("From:");
+                cPayeeLabel.setText("From:");
             }
             else{
-                cPayeeField.setText("To:");
+                cPayeeLabel.setText("To:");
             }
         });
             
