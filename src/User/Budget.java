@@ -3,15 +3,17 @@ package User;
 import Helper.GeneralHelper;
 
 public class Budget {
-    private String mCategory;
-    private double mBudgeted;
-    private double mSpent;
+    private String mCategory = "";
+    private double mBudgeted = 0.0;
+    private double mSpent = 0.0;
 
     public Budget(String pCategory, double pBudgeted, double pSpent) {
         this.mCategory = GeneralHelper.cleanCategoryString(pCategory);
         this.mBudgeted = pBudgeted;
         this.mSpent = pSpent;
     }
+
+    public Budget(){}
 
     @Override
     public String toString() {
@@ -30,6 +32,11 @@ public class Budget {
 
         tStringBuilderWorkingVar.append("Spent: ");
         tStringBuilderWorkingVar.append(this.mSpent);    
+        tStringBuilderWorkingVar.append(tSeparator);
+
+        tStringBuilderWorkingVar.append("Remaining: ");
+        double tRemaining = this.mBudgeted - this.mSpent;
+        tStringBuilderWorkingVar.append(tRemaining);    
         tStringBuilderWorkingVar.append(tSeparator);
 
         return tStringBuilderWorkingVar.toString();

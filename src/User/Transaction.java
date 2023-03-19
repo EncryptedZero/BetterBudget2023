@@ -33,14 +33,26 @@ public class Transaction {
     public String toString() {
         StringBuilder tStringBuilderWorkingVar = new StringBuilder();
         String tSeparator = System.lineSeparator();
-        tStringBuilderWorkingVar.append("Transaction Information");
+
+        if(this.mAmount < 0){
+            tStringBuilderWorkingVar.append("Withdrawal");
+        }
+        else{
+            tStringBuilderWorkingVar.append("Deposit");
+        }
+
         tStringBuilderWorkingVar.append(tSeparator);
 
         tStringBuilderWorkingVar.append("Date: ");
         tStringBuilderWorkingVar.append(this.mDate);
         tStringBuilderWorkingVar.append(tSeparator);
 
-        tStringBuilderWorkingVar.append("Payee: ");
+        if(this.mAmount < 0){
+            tStringBuilderWorkingVar.append("To: ");
+        }
+        else{
+            tStringBuilderWorkingVar.append("From: ");
+        }
         if(this.mPayee == null || this.mPayee.equals("")){
             tStringBuilderWorkingVar.append("N/A");
         }

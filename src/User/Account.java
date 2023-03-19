@@ -15,6 +15,7 @@ public class Account {
     private String mName;
     private int mAccountNumber;
     private ObservableList<Transaction> mTransactions = FXCollections.observableArrayList();
+    private ObservableList<Transaction> mTransactionsWorkingList = FXCollections.observableArrayList();
     private ObservableList<Budget> mBudgets = FXCollections.observableArrayList();
     
     private static Account single_instance = null;
@@ -90,6 +91,36 @@ public class Account {
 
     public void setTransactions(ObservableList<Transaction> pTransactions) {
         this.mTransactions = pTransactions;
+        setTransactionsWorkingListFromTransactions();
+    }
+    
+    public ObservableList<Transaction> getTransactionsWorkingList() {
+        return this.mTransactionsWorkingList;
+    }
+
+    public void setTransactionsWorkingListByBudgetCode(String pBudgetCode) {
+        if(pBudgetCode == null || "".equals(pBudgetCode)){
+            setTransactionsWorkingListFromTransactions();
+        }
+        else{
+            this.mTransactionsWorkingList.clear();
+            for(Transaction t: this.mTransactions){
+                if(t.getCategory().equals(GeneralHelper.cleanCategoryString(pBudgetCode))){
+                    this.mTransactionsWorkingList.add(t);
+                    System.out.println("Yay");
+                }
+                else{
+                    System.out.println(pBudgetCode + " != " + t.getCategory());
+                }
+            }
+        }
+    }
+
+    public void setTransactionsWorkingListFromTransactions() {
+        this.mTransactionsWorkingList.clear();
+        for(Transaction t: this.mTransactions){
+            this.mTransactionsWorkingList.add(t);
+        }
     }
 
     public ObservableList<Budget> getBudgets() {
@@ -102,6 +133,7 @@ public class Account {
 
     public void addTransaction(Transaction pTransaction){
         this.mTransactions.add(pTransaction);
+        this.mTransactionsWorkingList = this.mTransactions;
     }
 
     public void addBudget(Budget pBudget){

@@ -8,20 +8,25 @@ import java.util.Comparator;
 import java.util.Date;
 
 import Graphical.AlertBox;
+import Graphical.BudgetEntryBox;
 import Graphical.ConfirmBox;
 import Graphical.TransactionEntryBox;
 import Helper.FileHelper;
 import Stages.MainStage;
 import User.Account;
+import User.Budget;
 import User.Transaction;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -50,6 +55,7 @@ import javafx.scene.layout.VBox;
 public class HomeScene extends AbstractScene{
 
     private Account mAccount = Account.getInstance();
+    private PieChart mPie;
     private LineChart mGraph;
     Label cAccountBalanceLabel = new Label("");
     private static final HomeScene INSTANCE = new HomeScene();
@@ -67,7 +73,7 @@ public class HomeScene extends AbstractScene{
         Label cAccountNameLabel = new Label("Account Name: " + mAccount.getName());
         Label cAccountNumberLabel = new Label("Account Number: " + mAccount.getAccountNumber());
 
-        VBox cSceneLeftLayout = new VBox(40);
+        VBox cSceneLeftLayout = new VBox(20);
 
         Button cDeleteAccountButton = new Button("Delete Account");
         cDeleteAccountButton.setOnAction(e -> {
@@ -90,8 +96,11 @@ public class HomeScene extends AbstractScene{
         VBox cSceneLeftAccountPanel = new VBox(10);
         cSceneLeftAccountPanel.getChildren().addAll(cAccountNameLabel, cAccountNumberLabel, cAccountBalanceLabel, cSceneLeftButtonHBox);
 
+        // This just sets it to the Transactions list
+        mAccount.setTransactionsWorkingListByBudgetCode("");
+
         VBox cSceneLeftTransactionPanel = new VBox(20);
-        ListView<Transaction> cSceneLeftTransactionListView = new ListView<Transaction>(mAccount.getTransactions());
+        ListView<Transaction> cSceneLeftTransactionListView = new ListView<Transaction>(mAccount.getTransactionsWorkingList());
         
         // Adding to scroll panel so the listview will have a scrollbar instead of just extending the stage. 
         ScrollPane cSceneLeftTransactionScrollPanel = new ScrollPane();
@@ -112,6 +121,15 @@ public class HomeScene extends AbstractScene{
                 Transaction tTransaction = tTransactionEntryBox.getTransaction();
                 mAccount.addTransaction(tTransaction);
                 FileHelper.writeJSONFile(mAccount.toJSONObject());
+                if(mAccount.getTransactionsWorkingList() != null && mAccount.getTransactionsWorkingList().size() > 2) {
+                    cSceneLeftLayout.getChildren().remove(mGraph);
+                    mGraph = updateGraph();
+                    cSceneLeftLayout.getChildren().add(mGraph);
+                } else if(mAccount.getTransactionsWorkingList() != null && mAccount.getTransactionsWorkingList().size() > 1) {
+                    mGraph = updateGraph();
+                    cSceneLeftLayout.getChildren().add(mGraph);
+                }
+                
                 refresh();
             }
             catch(Exception ex){
@@ -134,25 +152,111 @@ public class HomeScene extends AbstractScene{
 
         cSceneLeftLayout.getChildren().addAll(cSceneLeftAccountPanel, cSceneLeftTransactionPanelLabel, cSceneLeftTransactionContainer);
 
-        // Graph creation, do not worry about setting data; it is set in the refresh method.
-        if(mAccount.getTransactions() != null && mAccount.getTransactions().size() > 1){
-
-            NumberAxis yAxis = new NumberAxis();  
-            yAxis.setLabel("Account Balance");
-
-            NumberAxis xAxis = new NumberAxis();
-            xAxis.setLabel("Time in Years");
-            mGraph = new LineChart(xAxis, yAxis);
+        // This solves an issue with there being more than one graph
+        if(mAccount.getTransactionsWorkingList() != null && mAccount.getTransactionsWorkingList().size() > 2) {
+            cSceneLeftLayout.getChildren().remove(mGraph);
+            mGraph = updateGraph();
+            cSceneLeftLayout.getChildren().add(mGraph);
+        } else if(mAccount.getTransactionsWorkingList() != null && mAccount.getTransactionsWorkingList().size() > 1) {
+            mGraph = updateGraph();
             cSceneLeftLayout.getChildren().add(mGraph);
         }
-
 
         HBox cSceneFullLayout = new HBox(20);
         cSceneFullLayout.getChildren().add(cSceneLeftLayout);
 
         // Now for the right scene 
-        VBox cSceneRightLayout = new VBox(10);
+        VBox cSceneRightLayout = new VBox(20);
 
+        VBox cSceneRightBudgetLayout = new VBox(10);
+
+        ListView<Budget> cSceneRightBudgetListView = new ListView<Budget>(mAccount.getBudgets());
+
+        cSceneRightBudgetListView.setCellFactory(lv -> {
+            ListCell<Budget> cell = new ListCell<Budget>() {
+                @Override
+                protected void updateItem(Budget item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(item.toString());
+                    }
+                }
+            };
+        
+            cell.setOnMouseClicked(event -> {
+                // Check if the mouse click count is 1 (single-click)
+                if (event.getClickCount() == 2) {
+                    // Item is already selected, deselect it
+                    cSceneRightBudgetListView.getSelectionModel().clearSelection();
+                    // Handling deselection here
+                    mAccount.setTransactionsWorkingListByBudgetCode("");
+                } 
+                else if(event.getClickCount() == 1){
+                    // Item is not selected, select it and clear any other selections
+                    cSceneRightBudgetListView.getSelectionModel().clearAndSelect(cell.getIndex());
+                    // Handling selection here
+                    Budget selectedBudget = cSceneRightBudgetListView.getSelectionModel().getSelectedItem();
+                    if(selectedBudget != null){
+                        mAccount.setTransactionsWorkingListByBudgetCode(selectedBudget.getCategory());
+                    }
+                    else{
+                        mAccount.setTransactionsWorkingListByBudgetCode("");
+                    }
+                }
+                System.out.println(mAccount.getTransactionsWorkingList().size());
+                mGraph = updateGraph();
+                sortTransactionsByDate();
+            });
+        
+            return cell;
+        });
+        
+        // Only allow one selection at a time
+        cSceneRightBudgetListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        
+        
+        // Adding to scroll panel so the listview will have a scrollbar instead of just extending the stage. 
+        ScrollPane cSceneRightBudgetPanel = new ScrollPane();
+        // Now I know from a logical or philosophical perspective this is wrong, but it fixes my issues. 
+        cSceneRightBudgetPanel.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        cSceneRightBudgetPanel.setContent(cSceneRightBudgetListView);
+        cSceneRightBudgetPanel.setFitToWidth(true);
+        cSceneRightBudgetPanel.setFitToHeight(true);
+        cSceneRightBudgetPanel.setPrefViewportWidth(300);
+        cSceneRightBudgetPanel.setPrefViewportHeight(300);
+
+        Button cAddBudgetButton = new Button("Add Budget");
+        cAddBudgetButton.setOnAction(e -> {
+            try{
+                BudgetEntryBox tBudgetEntryBox = new BudgetEntryBox();
+                tBudgetEntryBox.display();
+                Budget tBudget = tBudgetEntryBox.getBudget();
+                mAccount.addBudget(tBudget);
+                FileHelper.writeJSONFile(mAccount.toJSONObject());
+
+                // This is where I update/call check on the pie chart, or maybe in the update budget balances actually... that is later though
+                
+                refresh();
+            }
+            catch(Exception ex){
+                ex.printStackTrace();
+                AlertBox.display("Error", "An error was encountered when creating a budget");
+            }
+        });
+
+        cSceneRightBudgetLayout.getChildren().addAll(cSceneRightBudgetPanel, cAddBudgetButton);
+
+        // Add pie chart here
+
+
+        cSceneRightLayout.getChildren().addAll(cSceneRightBudgetLayout);
+
+        cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to bottom, #d0bfff, #befed8);");
+        
+        cSceneFullLayout.getChildren().add(cSceneRightLayout);
 
         Scene tTempScene = new Scene(cSceneFullLayout, 800, 800);
         setCurrentScene(tTempScene);
@@ -179,17 +283,19 @@ public class HomeScene extends AbstractScene{
     }
 
     // Loads/sorts data and keep data current
+    // Showed be called when program is loaded, transaction is added, or budget is added, or budget is selected (to refresh everything with the budget code)
     private void refresh(){
         updateAccountBalance();
         sortTransactionsByDate();
-        updateGraph();
+        updateBudgetBalances();
     }
 
-    private void updateGraph(){
-        if(mAccount.getTransactions() != null && mAccount.getTransactions().size() > 1){
+    private LineChart updateGraph(){
+        LineChart tGraph;
+        if(mAccount.getTransactionsWorkingList() != null && mAccount.getTransactionsWorkingList().size() > 1){
             LocalDate minDate = LocalDate.MAX;
             LocalDate maxDate = LocalDate.MIN;
-            for (Transaction t : mAccount.getTransactions()) {
+            for (Transaction t : mAccount.getTransactionsWorkingList()) {
                 LocalDate date = t.getDateAsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 if (date.isBefore(minDate)) {
                     minDate = date;
@@ -202,12 +308,12 @@ public class HomeScene extends AbstractScene{
             // Determine the minimum and maximum account totals in the transactions list
             double minTotal = Double.MAX_VALUE;
             double maxTotal = Double.MIN_VALUE;
-            for (Transaction t : mAccount.getTransactions()) {
-                if (Math.abs(t.getAmount()) < minTotal) {
-                    minTotal = Math.abs(t.getAmount());
+            for (Transaction t : mAccount.getTransactionsWorkingList()) {
+                if (t.getAmount() < minTotal) {
+                    minTotal = t.getAmount();
                 }
-                if (Math.abs(t.getAmount()) > maxTotal) {
-                    maxTotal = Math.abs(t.getAmount());
+                if (t.getAmount() > maxTotal) {
+                    maxTotal = t.getAmount();
                 }
             }
     
@@ -226,40 +332,39 @@ public class HomeScene extends AbstractScene{
             } else {
                 dateTickUnit = 12;
             }
-    
-            NumberAxis yAxis = new NumberAxis();  
-            yAxis.setLabel("Account Balance");
-    
-            NumberAxis xAxis = new NumberAxis();
-            xAxis.setLabel("Time in Months");
-    
-            // Set the lower and upper bounds of the x-axis to show only the last 10 years of data
-            if (dateRange.getYears() <= 10) {
-                LocalDate lowerBound = maxDate.minusYears(10).withDayOfMonth(1);
-                LocalDate upperBound = maxDate.withDayOfMonth(1);
-                xAxis.setLowerBound(lowerBound.getYear() + lowerBound.getMonthValue() / 12.0);
-                xAxis.setUpperBound(upperBound.getYear() + upperBound.getMonthValue() / 12.0);
-                mGraph = new LineChart(xAxis, yAxis);
-            }
+
             if(dateTickUnit != 12){
 
                 NumberAxis yAxis2 = new NumberAxis();  
                 yAxis2.setLabel("Account Balance");
                 
-                yAxis2.setLowerBound(minDate.getYear());
-                yAxis2.setUpperBound(maxDate.getYear() + 1); 
+                yAxis2.setLowerBound(minTotal);
+                yAxis2.setUpperBound(maxTotal); 
             
                 NumberAxis xAxis2 = new NumberAxis();
                 xAxis2.setLabel("Time in Years");
-                mGraph = new LineChart(xAxis2, yAxis2);
                 
+                xAxis2.setLowerBound(minDate.getYear());
+                xAxis2.setUpperBound(maxDate.getYear()); 
+                xAxis2.setAutoRanging(false);
+                System.out.println(maxDate.getYear());
+
+                tGraph = new LineChart(xAxis2, yAxis2);
+
             } else {
                 NumberAxis yAxis2 = new NumberAxis();  
                 yAxis2.setLabel("Account Balance");
+                
+                yAxis2.setLowerBound(minTotal);
+                yAxis2.setUpperBound(maxTotal); 
             
                 NumberAxis xAxis2 = new NumberAxis();
                 xAxis2.setLabel("Time in Months");
-                mGraph = new LineChart(xAxis2, yAxis2);
+
+                xAxis2.setLowerBound(minDate.getMonthValue());
+                xAxis2.setUpperBound(maxDate.getMonthValue()); 
+
+                tGraph = new LineChart(xAxis2, yAxis2);
             }
             
             double totalTickUnit = 5000.0;
@@ -279,8 +384,12 @@ public class HomeScene extends AbstractScene{
             
             // Create a series of data points for the line chart
             XYChart.Series<Number, Number> dataSeries = new XYChart.Series<>();
+            dataSeries.setName("Account Balance over Time");
             double currentTotal = 0.0;
-            for (Transaction t : mAccount.getTransactions()) {
+            // Need to reverse because as of now, the newest dates are at the top of the list
+            // This would throw of the currentTotal if not tempary reversed.
+            Collections.reverse(mAccount.getTransactionsWorkingList());
+            for (Transaction t : mAccount.getTransactionsWorkingList()) {
                 LocalDate date = t.getDateAsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 currentTotal += t.getAmount();
                 if(dateTickUnit != 12){
@@ -289,16 +398,36 @@ public class HomeScene extends AbstractScene{
                     dataSeries.getData().add(new XYChart.Data<Number, Number>(date.getMonthValue(), currentTotal));
                 }
             }
+            Collections.reverse(mAccount.getTransactionsWorkingList());
             
             // Add the data series to the line chart
-            mGraph.getData().add(dataSeries);
+            tGraph.getData().add(dataSeries);
             
             // Set the tick units for the x-axis and y-axis of the line chart
-            ((NumberAxis) mGraph.getXAxis()).setTickUnit(dateTickUnit);
-            ((NumberAxis) mGraph.getYAxis()).setTickUnit(totalTickUnit);
+            ((NumberAxis) tGraph.getXAxis()).setTickUnit(dateTickUnit);
+            ((NumberAxis) tGraph.getYAxis()).setTickUnit(totalTickUnit);
+            return tGraph;
         }
+        return null;
     }
     
+    private void updateBudgetBalances(){
+        try{
+            for(Budget b: mAccount.getBudgets()){
+                b.setSpent(0.00);
+                // Keep at getTransactions, we want all not working list
+                // If working list is got, when one budget is selected, the rest will break.
+                for(Transaction t: mAccount.getTransactions()){
+                    if(t.getCategory().equals(b.getCategory())){
+                        b.setSpent(b.getSpent() - t.getAmount());
+                    }
+                }
+            }
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }
 
     private void updateAccountBalance(){
         try{
@@ -319,8 +448,8 @@ public class HomeScene extends AbstractScene{
     }
 
     private void sortTransactionsByDate() {
-        if (mAccount.getTransactions() != null && mAccount.getTransactions().size() > 1) {
-            Collections.sort(mAccount.getTransactions(), new Comparator<Transaction>() {
+        if (mAccount.getTransactionsWorkingList() != null && mAccount.getTransactionsWorkingList().size() > 1) {
+            Collections.sort(mAccount.getTransactionsWorkingList(), new Comparator<Transaction>() {
                 @Override
                 public int compare(Transaction t1, Transaction t2) {
                     Date d1 = t1.getDateAsDate();
@@ -338,7 +467,7 @@ public class HomeScene extends AbstractScene{
                     }
                 }
             });
-            Collections.reverse(mAccount.getTransactions());
+            Collections.reverse(mAccount.getTransactionsWorkingList());
         }
     }
     
