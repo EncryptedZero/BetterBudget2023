@@ -107,10 +107,6 @@ public class Account {
             for(Transaction t: this.mTransactions){
                 if(t.getCategory().equals(GeneralHelper.cleanCategoryString(pBudgetCode))){
                     this.mTransactionsWorkingList.add(t);
-                    System.out.println("Yay");
-                }
-                else{
-                    System.out.println(pBudgetCode + " != " + t.getCategory());
                 }
             }
         }
