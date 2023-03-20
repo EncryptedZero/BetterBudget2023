@@ -16,6 +16,8 @@ import Stages.MainStage;
 import User.Account;
 import User.Budget;
 import User.Transaction;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -70,10 +72,12 @@ public class HomeScene extends AbstractScene{
 
     @Override
     public void initialize() {
+        mAccount.getBudgetByBudgetCode("");
         Label cAccountNameLabel = new Label("Account Name: " + mAccount.getName());
         Label cAccountNumberLabel = new Label("Account Number: " + mAccount.getAccountNumber());
 
         VBox cSceneLeftLayout = new VBox(20);
+        VBox cSceneRightLayout = new VBox(20);
 
         Button cDeleteAccountButton = new Button("Delete Account");
         cDeleteAccountButton.setOnAction(e -> {
@@ -120,6 +124,7 @@ public class HomeScene extends AbstractScene{
                 tTransactionEntryBox.display();
                 Transaction tTransaction = tTransactionEntryBox.getTransaction();
                 mAccount.addTransaction(tTransaction);
+                mAccount.setTransactionsWorkingListByBudgetCode("");
                 FileHelper.writeJSONFile(mAccount.toJSONObject());
                 if(mAccount.getTransactionsWorkingList() != null && mAccount.getTransactionsWorkingList().size() > 2) {
                     cSceneLeftLayout.getChildren().remove(mGraph);
@@ -129,6 +134,9 @@ public class HomeScene extends AbstractScene{
                     mGraph = updateGraph();
                     cSceneLeftLayout.getChildren().add(mGraph);
                 }
+                cSceneRightLayout.getChildren().remove(mPie);
+                mPie = updatePieChart("");
+                cSceneRightLayout.getChildren().add(mPie);
                 
                 refresh();
             }
@@ -166,56 +174,13 @@ public class HomeScene extends AbstractScene{
         cSceneFullLayout.getChildren().add(cSceneLeftLayout);
 
         // Now for the right scene 
-        VBox cSceneRightLayout = new VBox(20);
 
         VBox cSceneRightBudgetLayout = new VBox(10);
 
         ListView<Budget> cSceneRightBudgetListView = new ListView<Budget>(mAccount.getBudgets());
-
-        cSceneRightBudgetListView.setCellFactory(lv -> {
-            ListCell<Budget> cell = new ListCell<Budget>() {
-                @Override
-                protected void updateItem(Budget item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setText(null);
-                    } else {
-                        setText(item.toString());
-                    }
-                }
-            };
-        
-            cell.setOnMouseClicked(event -> {
-                // Check if the mouse click count is 1 (single-click)
-                if (event.getClickCount() == 2) {
-                    // Item is already selected, deselect it
-                    cSceneRightBudgetListView.getSelectionModel().clearSelection();
-                    // Handling deselection here
-                    mAccount.setTransactionsWorkingListByBudgetCode("");
-                } 
-                else if(event.getClickCount() == 1){
-                    // Item is not selected, select it and clear any other selections
-                    cSceneRightBudgetListView.getSelectionModel().clearAndSelect(cell.getIndex());
-                    // Handling selection here
-                    Budget selectedBudget = cSceneRightBudgetListView.getSelectionModel().getSelectedItem();
-                    if(selectedBudget != null){
-                        mAccount.setTransactionsWorkingListByBudgetCode(selectedBudget.getCategory());
-                    }
-                    else{
-                        mAccount.setTransactionsWorkingListByBudgetCode("");
-                    }
-                }
-                System.out.println(mAccount.getTransactionsWorkingList().size());
-                mGraph = updateGraph();
-                sortTransactionsByDate();
-            });
-        
-            return cell;
-        });
         
         // Only allow one selection at a time
         cSceneRightBudgetListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        
         
         // Adding to scroll panel so the listview will have a scrollbar instead of just extending the stage. 
         ScrollPane cSceneRightBudgetPanel = new ScrollPane();
@@ -247,12 +212,66 @@ public class HomeScene extends AbstractScene{
             }
         });
 
+        cSceneRightBudgetListView.setCellFactory(lv -> {
+            ListCell<Budget> cell = new ListCell<Budget>() {
+                @Override
+                protected void updateItem(Budget item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(item.toString());
+                    }
+                }
+            };
+        
+            cell.setOnMouseClicked(event -> {
+                cSceneRightLayout.getChildren().clear();
+                cSceneRightLayout.getChildren().add(cSceneRightBudgetLayout);
+                cSceneLeftLayout.getChildren().remove(mGraph);
+                // Check if the mouse click count is 1 (single-click)
+                if (event.getClickCount() == 2) {
+                    // Item is already selected, deselect it
+                    cSceneRightBudgetListView.getSelectionModel().clearSelection();
+                    // Handling deselection here
+                    mAccount.setTransactionsWorkingListByBudgetCode("");
+                    mPie = updatePieChart("");
+                } 
+                else if(event.getClickCount() == 1){
+                    // Item is not selected, select it and clear any other selections
+                    cSceneRightBudgetListView.getSelectionModel().clearAndSelect(cell.getIndex());
+                    // Handling selection here
+                    Budget selectedBudget = cSceneRightBudgetListView.getSelectionModel().getSelectedItem();
+                    if(selectedBudget != null){
+                        mAccount.setTransactionsWorkingListByBudgetCode(selectedBudget.getCategory());
+                        mPie = updatePieChart(selectedBudget.getCategory());
+                    }
+                    else{
+                        mAccount.setTransactionsWorkingListByBudgetCode("");
+                        mPie = updatePieChart("");
+                    }
+                }
+                System.out.println(mAccount.getTransactionsWorkingList().size());
+                mGraph = updateGraph();
+                sortTransactionsByDate();
+                
+                try{
+                    cSceneLeftLayout.getChildren().add(mGraph);
+                }
+                catch(Exception e){
+                    // Don't need to log, we want it to through an exception here if it only has one or less points to graph.
+                }
+                cSceneRightLayout.getChildren().add(mPie);
+            });
+        
+            return cell;
+        });
+
         cSceneRightBudgetLayout.getChildren().addAll(cSceneRightBudgetPanel, cAddBudgetButton);
 
-        // Add pie chart here
-
-
-        cSceneRightLayout.getChildren().addAll(cSceneRightBudgetLayout);
+        mPie = updatePieChart("");
+        
+        cSceneRightLayout.getChildren().addAll(cSceneRightBudgetLayout, mPie);
 
         cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to bottom, #d0bfff, #befed8);");
         
@@ -260,7 +279,7 @@ public class HomeScene extends AbstractScene{
 
         Scene tTempScene = new Scene(cSceneFullLayout, 800, 800);
         setCurrentScene(tTempScene);
-        
+
         refresh();
     }
 
@@ -427,6 +446,51 @@ public class HomeScene extends AbstractScene{
         catch(Exception ex){
             ex.printStackTrace();
         }
+    }
+
+    private PieChart updatePieChart(String pBudgetCode){
+        mPie = new PieChart();
+        if(pBudgetCode == null || pBudgetCode.equals("")){
+            // Add data to the chart
+            Budget budget = mAccount.findClosestToFilled();
+            
+            System.out.println("Closest to filled: " + budget.getCategory());
+
+            String spentString = "Spent";
+            if(budget.getSpent() < 0){
+                spentString = "Extra Saved";
+            }
+
+            // create PieChart data with two slices
+            if(budget != null){
+                ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(  
+                    new PieChart.Data("Budgeted", budget.getBudgeted()),
+                    new PieChart.Data(spentString, budget.getSpent())
+                );
+                mPie.setData(pieChartData);
+            }
+        }
+        else{
+             // Add data to the chart
+             Budget budget = mAccount.getBudgetByBudgetCode(pBudgetCode);
+
+             String spentString = "Spent";
+             if(budget.getSpent() < 0){
+                spentString = "Extra Saved";
+             }
+             
+             // create PieChart data with two slices
+             if(budget != null){
+                ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(
+                    new PieChart.Data("Budgeted", budget.getBudgeted()),
+                    new PieChart.Data(spentString, budget.getSpent())
+                );
+
+                mPie.setData(pieChartData);
+             }
+ 
+        }
+        return mPie;
     }
 
     private void updateAccountBalance(){

@@ -30,8 +30,13 @@ public class Budget {
         tStringBuilderWorkingVar.append(this.mBudgeted);    
         tStringBuilderWorkingVar.append(tSeparator);
 
-        tStringBuilderWorkingVar.append("Spent: ");
-        tStringBuilderWorkingVar.append(this.mSpent);    
+        if(this.mSpent >= 0){
+            tStringBuilderWorkingVar.append("Spent: ");
+        }
+        else{
+            tStringBuilderWorkingVar.append("Extra Saved: ");
+        }
+        tStringBuilderWorkingVar.append(Math.abs(this.mSpent));    
         tStringBuilderWorkingVar.append(tSeparator);
 
         tStringBuilderWorkingVar.append("Remaining: ");

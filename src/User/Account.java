@@ -1,5 +1,8 @@
 package User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -129,7 +132,6 @@ public class Account {
 
     public void addTransaction(Transaction pTransaction){
         this.mTransactions.add(pTransaction);
-        this.mTransactionsWorkingList = this.mTransactions;
     }
 
     public void addBudget(Budget pBudget){
@@ -199,6 +201,43 @@ public class Account {
             System.out.println("An error has occured: " + e.getMessage());
             System.out.println("Stack Trace: " + e.getStackTrace());
         }
+    }
+
+    public Budget getBudgetByBudgetCode(String pBudgetCode){
+        // Users fault currently if they create more then one budget with the same code. 
+        List<Budget> budgets = new ArrayList<Budget>();
+        if(pBudgetCode != null){
+            for(Budget b: mBudgets){
+                if(pBudgetCode.equals(b.getCategory())){
+                    budgets.add(b);
+                }
+            }
+        }
+        if(budgets.size() > 0){
+            return budgets.get(0);
+        }
+        return null;
+    }
+
+    public Budget findClosestToFilled() {
+        Budget closestBudget = null;
+        double closestRatio = Double.MAX_VALUE;
+    
+        for (Budget budget : mBudgets) {
+            double ratio = budget.getSpent() / budget.getBudgeted();
+    
+            if (ratio >= 1.0) {
+                // The budget is already filled, so we can return it immediately.
+                return budget;
+            }
+    
+            if (1.0 - ratio < closestRatio) {
+                closestRatio = 1.0 - ratio;
+                closestBudget = budget;
+            }
+        }
+    
+        return closestBudget;
     }
 
     public JSONObject toJSONObject() {
