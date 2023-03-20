@@ -230,9 +230,10 @@ public class TransactionEntryBox {
             }
         });
 
-        vbox.getChildren().addAll(introLabel, cMonthLabel, cMonthField, cDayLabel, cDayField, cYearLabel, cYearField);
+        vbox.getChildren().addAll(introLabel, cMonthLabel, cMonthField, cDayLabel, cDayField, cYearLabel, cYearField, cIsPositive);
         vbox.getChildren().addAll(cPayeeLabel, cPayeeField, cBudgetCodeLabel, cBudgetCodeField, cNoteLabel, cNoteTextArea);
-        vbox.getChildren().addAll(cAmountLabel, cAmountField, cIsPositive, createButton);
+        vbox.getChildren().addAll(cAmountLabel, cAmountField, createButton);
+        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #d0bfff, #befed8);");
 
         // Forces focus to this window
         mStage.initModality(Modality.APPLICATION_MODAL);

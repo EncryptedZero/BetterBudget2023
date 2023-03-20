@@ -26,20 +26,20 @@ public class Budget {
         tStringBuilderWorkingVar.append(this.mCategory);
         tStringBuilderWorkingVar.append(tSeparator);
 
-        tStringBuilderWorkingVar.append("Budgeted: ");
+        tStringBuilderWorkingVar.append("Budgeted: $");
         tStringBuilderWorkingVar.append(this.mBudgeted);    
         tStringBuilderWorkingVar.append(tSeparator);
 
         if(this.mSpent >= 0){
-            tStringBuilderWorkingVar.append("Spent: ");
+            tStringBuilderWorkingVar.append("Spent: $");
         }
         else{
-            tStringBuilderWorkingVar.append("Extra Saved: ");
+            tStringBuilderWorkingVar.append("Extra Saved: $");
         }
         tStringBuilderWorkingVar.append(Math.abs(this.mSpent));    
         tStringBuilderWorkingVar.append(tSeparator);
 
-        tStringBuilderWorkingVar.append("Remaining: ");
+        tStringBuilderWorkingVar.append("Remaining: $");
         double tRemaining = this.mBudgeted - this.mSpent;
         tStringBuilderWorkingVar.append(tRemaining);    
         tStringBuilderWorkingVar.append(tSeparator);

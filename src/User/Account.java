@@ -108,7 +108,7 @@ public class Account {
         else{
             this.mTransactionsWorkingList.clear();
             for(Transaction t: this.mTransactions){
-                if(t.getCategory().equals(GeneralHelper.cleanCategoryString(pBudgetCode))){
+                if(t != null && t.getCategory().equals(GeneralHelper.cleanCategoryString(pBudgetCode))){
                     this.mTransactionsWorkingList.add(t);
                 }
             }

@@ -91,6 +91,7 @@ public class BudgetEntryBox {
 
         vbox.getChildren().addAll(introLabel, cBudgetCodeLabel, cBudgetCodeField);
         vbox.getChildren().addAll(cBudgetAmountLabel, cBudgetAmountField, createButton);
+        vbox.setStyle("-fx-background-color: linear-gradient(to bottom, #d0bfff, #befed8);");
 
         // Forces focus to this window
         mStage.initModality(Modality.APPLICATION_MODAL);

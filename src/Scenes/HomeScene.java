@@ -98,6 +98,10 @@ public class HomeScene extends AbstractScene{
         cSceneLeftButtonHBox.getChildren().addAll(getSaveButton(), cDeleteAccountButton);
 
         VBox cSceneLeftAccountPanel = new VBox(10);
+
+        cAccountNameLabel.setStyle("-fx-font-weight: bold;");
+        cAccountNumberLabel.setStyle("-fx-font-weight: bold;");
+        cAccountBalanceLabel.setStyle("-fx-font-weight: bold;");
         cSceneLeftAccountPanel.getChildren().addAll(cAccountNameLabel, cAccountNumberLabel, cAccountBalanceLabel, cSceneLeftButtonHBox);
 
         // This just sets it to the Transactions list
@@ -125,6 +129,7 @@ public class HomeScene extends AbstractScene{
                 Transaction tTransaction = tTransactionEntryBox.getTransaction();
                 mAccount.addTransaction(tTransaction);
                 mAccount.setTransactionsWorkingListByBudgetCode("");
+                updateBudgetBalances();
                 FileHelper.writeJSONFile(mAccount.toJSONObject());
                 if(mAccount.getTransactionsWorkingList() != null && mAccount.getTransactionsWorkingList().size() > 2) {
                     cSceneLeftLayout.getChildren().remove(mGraph);
@@ -156,7 +161,8 @@ public class HomeScene extends AbstractScene{
         cSceneLeftTransactionContainer.getChildren().addAll(cSceneLeftTransactionScrollPanel, cAddTransactionButton);
 
         // Creating a label to go above transaction panel
-        Label cSceneLeftTransactionPanelLabel = new Label("Transaction Information");
+        Label cSceneLeftTransactionPanelLabel = new Label("All Transactions");
+        cSceneLeftTransactionPanelLabel.setStyle("-fx-font-size: 2em; -fx-font-weight: bold;");
 
         cSceneLeftLayout.getChildren().addAll(cSceneLeftAccountPanel, cSceneLeftTransactionPanelLabel, cSceneLeftTransactionContainer);
 
@@ -175,7 +181,7 @@ public class HomeScene extends AbstractScene{
 
         // Now for the right scene 
 
-        VBox cSceneRightBudgetLayout = new VBox(10);
+        VBox cSceneRightBudgetLayout = new VBox(2);
 
         ListView<Budget> cSceneRightBudgetListView = new ListView<Budget>(mAccount.getBudgets());
         
@@ -233,6 +239,7 @@ public class HomeScene extends AbstractScene{
                 if (event.getClickCount() == 2) {
                     // Item is already selected, deselect it
                     cSceneRightBudgetListView.getSelectionModel().clearSelection();
+                    cSceneLeftTransactionPanelLabel.setText("All Transactions");
                     // Handling deselection here
                     mAccount.setTransactionsWorkingListByBudgetCode("");
                     mPie = updatePieChart("");
@@ -243,6 +250,7 @@ public class HomeScene extends AbstractScene{
                     // Handling selection here
                     Budget selectedBudget = cSceneRightBudgetListView.getSelectionModel().getSelectedItem();
                     if(selectedBudget != null){
+                        cSceneLeftTransactionPanelLabel.setText(selectedBudget.getCategory() + " Transactions");
                         mAccount.setTransactionsWorkingListByBudgetCode(selectedBudget.getCategory());
                         mPie = updatePieChart(selectedBudget.getCategory());
                     }
@@ -266,11 +274,15 @@ public class HomeScene extends AbstractScene{
         
             return cell;
         });
+        Label cSceneRightBudgetPanelLabel = new Label("Budgets");
+        cSceneRightBudgetPanelLabel.setStyle("-fx-font-size: 2em; -fx-font-weight: bold; -fx-allignment:center");
 
-        cSceneRightBudgetLayout.getChildren().addAll(cSceneRightBudgetPanel, cAddBudgetButton);
+        cSceneRightBudgetLayout.getChildren().addAll(cSceneRightBudgetPanelLabel, cSceneRightBudgetPanel, cAddBudgetButton);
 
+        // Need to updateBudgetBalances to get updatePieChart to work
+        updateBudgetBalances();
         mPie = updatePieChart("");
-        
+
         cSceneRightLayout.getChildren().addAll(cSceneRightBudgetLayout, mPie);
 
         cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to bottom, #d0bfff, #befed8);");
@@ -453,27 +465,28 @@ public class HomeScene extends AbstractScene{
         if(pBudgetCode == null || pBudgetCode.equals("")){
             // Add data to the chart
             Budget budget = mAccount.findClosestToFilled();
-            
-            System.out.println("Closest to filled: " + budget.getCategory());
-
-            String spentString = "Spent";
-            if(budget.getSpent() < 0){
-                spentString = "Extra Saved";
-            }
 
             // create PieChart data with two slices
             if(budget != null){
+                mPie.setTitle("Pie Chart for " + budget.getCategory());
+                String spentString = "Spent";
+                if(budget.getSpent() < 0){
+                    spentString = "Extra Saved";
+                }
                 ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(  
                     new PieChart.Data("Budgeted", budget.getBudgeted()),
                     new PieChart.Data(spentString, budget.getSpent())
                 );
                 mPie.setData(pieChartData);
             }
+            else {
+                mPie.setTitle("");
+            }
         }
         else{
              // Add data to the chart
              Budget budget = mAccount.getBudgetByBudgetCode(pBudgetCode);
-
+             mPie.setTitle("Pie Chart for " + pBudgetCode);
              String spentString = "Spent";
              if(budget.getSpent() < 0){
                 spentString = "Extra Saved";
