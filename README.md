@@ -1,6 +1,6 @@
-## Getting Started
-
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+## READ ME
+The project looks on C:/Java for referenced JavaFx Libaries, may have issues running.
+Demo: https://youtu.be/iIDSC6d0wBA
 
 ## Folder Structure
 
