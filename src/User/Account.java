@@ -239,36 +239,4 @@ public class Account {
     
         return closestBudget;
     }
-
-    public JSONObject toJSONObject() {
-        JSONObject accountData = new JSONObject();
-        accountData.put("AccountName", this.mName);
-        accountData.put("AccountNumber", this.mAccountNumber);
-
-        // Generate transaction data as a JSONArray
-        JSONArray transactionData = new JSONArray();
-        for (Transaction tTransaction : this.mTransactions) {
-            JSONObject transactionObj = new JSONObject();
-            transactionObj.put("Date", tTransaction.getDateAsString());
-            transactionObj.put("Payee", tTransaction.getPayee());
-            transactionObj.put("Category", tTransaction.getCategory());
-            transactionObj.put("Note", tTransaction.getNote());
-            transactionObj.put("Amount", tTransaction.getAmount());
-            transactionData.add(transactionObj);
-        }
-        accountData.put("Transactions", transactionData);
-
-        // Generate budget data as a JSONArray
-        JSONArray budgetData = new JSONArray();
-        for (Budget tBudget : this.mBudgets) {
-            JSONObject budgetObj = new JSONObject();
-            budgetObj.put("Category", tBudget.getCategory());
-            budgetObj.put("Budgeted", tBudget.getBudgeted());
-            budgetObj.put("Spent", tBudget.getSpent());
-            budgetData.add(budgetObj);
-        }
-        accountData.put("Budgets", budgetData);
-
-        return accountData;
-    }
 }

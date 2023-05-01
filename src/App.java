@@ -21,8 +21,19 @@ public class App extends Application {
         MainStage.getInstance().setStage(pStage);
         mNewScene.initialize();
         tNewScene = mNewScene.getCurrentScene();
+        // Make starting scene with login or create an account
+        // LaunchLoginPrompt();
+        // Pass int to list being account number selected
         CalculateStartingScene();
         MainStage.getInstance().show();
+    }
+    public void LaunchLoginPrompt(){
+        // We want to launch the login screen
+        // The login screen should have a username and password option or a create account button.
+        // If login is entered then we need to launch an accounts window
+        // Then an account can be selected just like before, we could potentially implement a back button as well.
+        // Back button must clear account/user selection
+        // Classes needed Login page, CreateAccount page, User with Accounts list
     }
  
     public void CalculateStartingScene(){

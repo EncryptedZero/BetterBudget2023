@@ -15,8 +15,6 @@ import javafx.scene.layout.VBox;
 public class NewAccountScene extends AbstractScene{
 
     private Account mAccount = Account.getInstance();
-    private MainStage mMainStage = MainStage.getInstance();
-
     private static final NewAccountScene INSTANCE = new NewAccountScene();
 
     protected NewAccountScene(){
