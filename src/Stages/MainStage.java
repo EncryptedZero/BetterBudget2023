@@ -18,6 +18,7 @@ public class MainStage {
 
     public void setStage(Stage pStage){
         this.mStage = pStage;
+        this.mStage.setTitle("Better Budget");
     }
 
     public void setScene(Scene pScene){

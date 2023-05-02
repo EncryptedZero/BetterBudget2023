@@ -39,9 +39,10 @@ public class Budget {
         tStringBuilderWorkingVar.append(Math.abs(this.mSpent));    
         tStringBuilderWorkingVar.append(tSeparator);
 
-        tStringBuilderWorkingVar.append("Remaining: $");
         double tRemaining = this.mBudgeted - this.mSpent;
-        tStringBuilderWorkingVar.append(tRemaining);    
+        tRemaining = Math.round(tRemaining * 100.0) / 100.0;
+        tStringBuilderWorkingVar.append("Remaining: $" + tRemaining);
+          
         tStringBuilderWorkingVar.append(tSeparator);
 
         return tStringBuilderWorkingVar.toString();

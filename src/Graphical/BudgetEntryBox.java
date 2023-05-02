@@ -2,6 +2,7 @@ package Graphical;
 
 import Helper.GeneralHelper;
 import User.Budget;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -31,6 +32,7 @@ public class BudgetEntryBox {
     public void display(){
         // Create a VBox container with some padding
         VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10, 5, 10, 5));
         
         Label introLabel = new Label("Please enter budget information");
 

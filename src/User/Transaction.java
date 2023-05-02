@@ -81,10 +81,13 @@ public class Transaction {
 
         tStringBuilderWorkingVar.append("Amount: ");
         if(this.mAmount < 0){
-            tStringBuilderWorkingVar.append("-$" + Math.abs(this.mAmount));    
+            double roundedAmount = Math.round(this.mAmount * 100.0) / 100.0;
+            tStringBuilderWorkingVar.append("-$" + String.format("%.2f", Math.abs(roundedAmount)));
         }
-        else{
-            tStringBuilderWorkingVar.append("$" + this.mAmount);    
+        else{ 
+            double roundedAmount = Math.round(this.mAmount * 100.0) / 100.0;
+            tStringBuilderWorkingVar.append("$" + String.format("%.2f", roundedAmount));
+ 
         }
         tStringBuilderWorkingVar.append(tSeparator);
 

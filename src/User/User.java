@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.crypto.SecretKeyFactory;
@@ -97,6 +98,11 @@ public class User {
     
     public void setCurrentAccount(Account pCurrentAccount){
         this.mCurrentAccount = pCurrentAccount;
+
+        // Adding acount to accounts list and removing duplicates
+        this.mAccounts.add(mCurrentAccount);
+        HashSet<Account> tempSetAccounts = new HashSet<>(this.mAccounts);
+        this.mAccounts = new ArrayList<>(tempSetAccounts);
     }
 
     public List<Account> getAccounts(){

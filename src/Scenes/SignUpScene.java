@@ -6,6 +6,7 @@ import User.User;
 import User.Users;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -31,6 +32,7 @@ public class SignUpScene extends AbstractScene {
     public void initialize() {
          // main vbox
          VBox vbox = new VBox(10);
+         vbox.setPadding(new Insets(10, 5, 10, 5));
     
          Label introLabel = new Label("Sign Up");
          introLabel.setStyle("-fx-font-size: 1.5em; -fx-font-weight: bold;");
@@ -75,11 +77,14 @@ public class SignUpScene extends AbstractScene {
                 Users.getInstance().addUser(tempUser);
 
                 errorTextLabel.setText("");
-                usernameField.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
-                passwordField.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
+
+                // #4F9301 is also know as Avocado
+                usernameField.setStyle("-fx-border-color: #4F9301; -fx-border-width: 2px;");
+                passwordField.setStyle("-fx-border-color: #4F9301; -fx-border-width: 2px;");
 
                 // all of this is because I want to show the borders green for success instead of launching an ugly alertbox.
-                Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.25), event -> {
+                // Sleep would stall the GUI and that would mean no avocado green for success :(
+                Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.35), event -> {
                         // Going back to login screen
                         try{
                             FileHelper.writeJSONFile(Users.getInstance().toJSONObject());

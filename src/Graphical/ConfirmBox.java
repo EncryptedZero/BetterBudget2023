@@ -1,5 +1,6 @@
 package Graphical;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -38,6 +39,7 @@ public class ConfirmBox {
         });
 
         VBox mVBox1 = new VBox(10);
+        mVBox1.setPadding(new Insets(10, 5, 10, 5));
         HBox mHBox = new HBox(10);
         mHBox.getChildren().addAll(mYesButton, mNoButton);
         mVBox1.getChildren().addAll(mLabelMessage, mHBox);

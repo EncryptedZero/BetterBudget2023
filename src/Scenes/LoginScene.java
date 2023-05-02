@@ -2,6 +2,7 @@ package Scenes;
 
 import Stages.MainStage;
 import User.Users;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -28,6 +29,7 @@ public class LoginScene extends AbstractScene {
     public void initialize() {
         // main vbox
         VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10, 5, 10, 5));
     
         Label introLabel = new Label("Login");
         introLabel.setStyle("-fx-font-size: 1.5em; -fx-font-weight: bold;");
@@ -70,9 +72,18 @@ public class LoginScene extends AbstractScene {
                         // Launch accounts scene
                         usernameField.setStyle("-fx-border-color: green;");
                         passwordField.setStyle("-fx-border-color: green;");
-                        AccountsScene.getInstance().initialize();
-                        MainStage.getInstance().setScene(AccountsScene.getInstance().getCurrentScene());
-                        MainStage.getInstance().show();
+
+                        // If they don't have any account we will put them right to the create account screen. 
+                        if(Users.getInstance().getCurrentUser().getAccounts().size() < 1){
+                            NewAccountScene.getInstance().initialize();
+                            MainStage.getInstance().setScene(NewAccountScene.getInstance().getCurrentScene());
+                            MainStage.getInstance().show();
+                        }
+                        else{
+                            AccountsScene.getInstance().initialize();
+                            MainStage.getInstance().setScene(AccountsScene.getInstance().getCurrentScene());
+                            MainStage.getInstance().show();
+                        }
                 }
                 else{
                     errorTextLabel.setText("Error: Password is incorrect");

@@ -1,7 +1,10 @@
 package User;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -41,15 +44,16 @@ public class Users {
     }
 
     public boolean isUsernameTaken(String pUsernameAttempt){
+        System.out.println(mUsers.size());
         for(User u: mUsers){
-            if(u.getUsername().equals(pUsernameAttempt)){
+            if(u != null && u.getUsername().equals(pUsernameAttempt)){
                 return true;
             }
         }
         return false;
     }
 
-    public void setCurrentUser(User pCurrentUser){
+    private void setCurrentUser(User pCurrentUser){
         this.mCurrentUser = pCurrentUser;
     }
 
@@ -61,10 +65,20 @@ public class Users {
         mUsers.add(pUser);
     }
 
+    private void combineCurrentUser(){
+        mUsers.add(mCurrentUser);
+        HashSet<User> setUsers = new HashSet<>(mUsers);
+        mUsers = new ArrayList<>(setUsers);
+    }
+
     // Making json object order is Users -> user -> accounts -> account (-> transactions -> transaction) AND (-> budgets -> budget)
     public JSONObject toJSONObject() {
+        combineCurrentUser();
         JSONObject fullDataObject = new JSONObject();
         JSONArray usersData = new JSONArray();
+        
+        mUsers.removeAll(Collections.singleton(null));
+
         for(User u: mUsers){
             JSONObject userObject = new JSONObject();
             userObject.put("Username", u.getUsername());
@@ -76,6 +90,7 @@ public class Users {
                 JSONObject accountObject = new JSONObject();
                 accountObject.put("AccountName", a.getAccountName());
                 accountObject.put("AccountNumber", a.getAccountNumber());
+                accountObject.put("LastAccessed", a.getLastAccessed().toString());
 
                 JSONArray transactionData = new JSONArray();
                 for (Transaction t : a.getTransactions()) {
@@ -99,6 +114,7 @@ public class Users {
                     budgetData.add(budgetObj);
                 }
                 accountObject.put("Budgets", budgetData);
+                accountsData.add(accountObject);
             }
             userObject.put("Accounts", accountsData);
             usersData.add(userObject);
@@ -129,7 +145,9 @@ public class Users {
                     Account tempAccount = new Account();
 
                     tempAccount.setAccountName(accountObject.get("AccountName").toString());
-                    tempAccount.setAccountNumber((int) accountObject.get("AccountNumber"));
+                    tempAccount.setAccountNumber(((Long) accountObject.get("AccountNumber")).intValue());
+                    LocalDateTime tDateTime = LocalDateTime.parse(accountObject.get("LastAccessed").toString());
+                    tempAccount.setLastAccessed(tDateTime);
 
                     // Now to get transactions
                     JSONArray transactionsData = (JSONArray) accountObject.get("Transactions");
@@ -168,8 +186,7 @@ public class Users {
             }
         }
         catch(Exception e){
-            System.out.println("An error has occured: " + e.getMessage());
-            System.out.println("Stack Trace: " + e.getStackTrace());
+            e.printStackTrace();
         }
     }
 }

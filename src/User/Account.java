@@ -1,5 +1,6 @@
 package User;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,45 +14,30 @@ import javafx.collections.ObservableList;
 public class Account {
     private String mName;
     private int mAccountNumber;
+    private LocalDateTime lastAccessed;
     private ObservableList<Transaction> mTransactions = FXCollections.observableArrayList();
     private ObservableList<Transaction> mTransactionsWorkingList = FXCollections.observableArrayList();
     private ObservableList<Budget> mBudgets = FXCollections.observableArrayList();
 
-    public Account(){}
+    public Account(){
+    }
 
-    /**
-     * Primarily for testing. 
-     */
     @Override
     public String toString() {
         StringBuilder tStringBuilderWorkingVar = new StringBuilder();
         String tSeparator = System.lineSeparator();
-        tStringBuilderWorkingVar.append("Account Information");
-        tStringBuilderWorkingVar.append(tSeparator);
 
-        tStringBuilderWorkingVar.append("Name: ");
+        tStringBuilderWorkingVar.append("Account Name: ");
         tStringBuilderWorkingVar.append(this.mName);
         tStringBuilderWorkingVar.append(tSeparator);
 
-        tStringBuilderWorkingVar.append("Number: ");
+        tStringBuilderWorkingVar.append("Account Number: ");
         tStringBuilderWorkingVar.append(this.mAccountNumber);
         tStringBuilderWorkingVar.append(tSeparator);
 
-        if(this.mTransactions.size() > 0){
-            tStringBuilderWorkingVar.append("Transactions: ");
-            tStringBuilderWorkingVar.append(tSeparator);
-            for(Transaction tTransaction: this.mTransactions){
-                tStringBuilderWorkingVar.append(tTransaction.toString());
-            }
-        }   
-
-        if(this.mBudgets.size() > 0){
-            tStringBuilderWorkingVar.append("Budgets: ");
-            tStringBuilderWorkingVar.append(tSeparator);
-            for(Budget tBudget: this.mBudgets){
-                tStringBuilderWorkingVar.append(tBudget.toString());
-            }
-        }
+        tStringBuilderWorkingVar.append("Account Balance: ");
+        tStringBuilderWorkingVar.append(this.getBalance());
+        tStringBuilderWorkingVar.append(tSeparator);
 
         return tStringBuilderWorkingVar.toString();
     }
@@ -66,6 +52,17 @@ public class Account {
 
     public int getAccountNumber() {
         return this.mAccountNumber;
+    }
+
+    public void setLastAccessed(LocalDateTime pLocalDateTime) {
+        this.lastAccessed = pLocalDateTime;
+    }
+
+    public LocalDateTime getLastAccessed() {
+        if(this.lastAccessed == null){
+            this.lastAccessed = LocalDateTime.now();
+        }
+        return this.lastAccessed;
     }
 
     public void setAccountNumber(int pAccountNumber) {
@@ -115,11 +112,15 @@ public class Account {
     }
 
     public void addTransaction(Transaction pTransaction){
-        this.mTransactions.add(pTransaction);
+        if(pTransaction != null){
+            this.mTransactions.add(pTransaction);
+        }
     }
 
     public void addBudget(Budget pBudget){
-        this.mBudgets.add(pBudget);
+        if(pBudget != null){
+            this.mBudgets.add(pBudget);
+        }
     }
 
     public Double getBalance(){

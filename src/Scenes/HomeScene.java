@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Random;
 
 import Graphical.AlertBox;
 import Graphical.BudgetEntryBox;
@@ -19,6 +20,7 @@ import User.Transaction;
 import User.Users;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -80,15 +82,29 @@ public class HomeScene extends AbstractScene{
         Label cAccountNumberLabel = new Label("Account Number: " + mAccount.getAccountNumber());
 
         VBox cSceneLeftLayout = new VBox(20);
+        cSceneLeftLayout.setPadding(new Insets(15, 5, 15, 5));
+
         VBox cSceneRightLayout = new VBox(20);
+        cSceneRightLayout.setPadding(new Insets(15, 5, 15, 5));
 
         Button cDeleteAccountButton = new Button("Delete Account");
         cDeleteAccountButton.setOnAction(e -> {
             try{
                 ConfirmBox.display("Confirm Account Delete", "Are you sure you would like to delete your account? If yes is selected, program will be closed and account will be deleted.");
                 if(ConfirmBox.Confirmed){
-                    FileHelper.deleteFile();
-                    MainStage.getInstance().closeStage();
+                    Users.getInstance().getCurrentUser().getAccounts().remove(Users.getInstance().getCurrentUser().getCurrentAccount());
+                    FileHelper.writeJSONFile(Users.getInstance().toJSONObject());
+                    // If they don't have any account we will put them right to the create account screen. 
+                    if(Users.getInstance().getCurrentUser().getAccounts().size() < 1){
+                        NewAccountScene.getInstance().initialize();
+                        MainStage.getInstance().setScene(NewAccountScene.getInstance().getCurrentScene());
+                        MainStage.getInstance().show();
+                    }
+                    else{
+                        AccountsScene.getInstance().initialize();
+                        MainStage.getInstance().setScene(AccountsScene.getInstance().getCurrentScene());
+                        MainStage.getInstance().show();
+                    }
                 }
             }
             catch(Exception ex){
@@ -98,7 +114,22 @@ public class HomeScene extends AbstractScene{
         });
 
         HBox cSceneLeftButtonHBox = new HBox(10);
-        cSceneLeftButtonHBox.getChildren().addAll(getSaveButton(), cDeleteAccountButton);
+
+        Button logout = new Button("Logout");
+        logout.setOnAction(e -> {
+            LoginScene.getInstance().initialize();
+            MainStage.getInstance().setScene(LoginScene.getInstance().getCurrentScene());
+            MainStage.getInstance().show();
+        });
+
+        Button backtoAccountsButton = new Button("Accounts");
+        backtoAccountsButton.setOnAction(e -> {
+            AccountsScene.getInstance().initialize();
+            MainStage.getInstance().setScene(AccountsScene.getInstance().getCurrentScene());
+            MainStage.getInstance().show();
+        });
+
+        cSceneLeftButtonHBox.getChildren().addAll(logout, backtoAccountsButton, cDeleteAccountButton);
 
         VBox cSceneLeftAccountPanel = new VBox(10);
 
@@ -288,7 +319,28 @@ public class HomeScene extends AbstractScene{
 
         cSceneRightLayout.getChildren().addAll(cSceneRightBudgetLayout, mPie);
 
-        cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to bottom, #d0bfff, #befed8);");
+        Random gen = new Random();
+        int randomNumber = gen.nextInt(6);
+        switch(randomNumber){
+            case 0:
+                cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to left, #d0bfff, #befed8);");
+                break;
+            case 1:
+                cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to top, #d1f5ff, #ffd8cb);");
+                break;
+            case 2:
+                cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to right, #a8edea, #fed6e3);");
+                break;
+            case 3:
+                cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to right, #c1dfc4, #deecdd);");
+                break;
+            case 4:
+                cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to bottom, #e0c3fc, #8ec5fc);");
+                break;
+            case 5:
+                cSceneFullLayout.setStyle("-fx-background-color: linear-gradient(to bottom, #fbc2eb, #a6c1ee);");
+                break;
+        }
         
         cSceneFullLayout.getChildren().add(cSceneRightLayout);
 
@@ -296,24 +348,6 @@ public class HomeScene extends AbstractScene{
         setCurrentScene(tTempScene);
 
         refresh();
-    }
-
-
-
-    private Button getSaveButton(){
-        Button cSaveButton = new Button("Save");
-        cSaveButton.setOnAction(e -> {
-            try{
-                FileHelper.writeJSONFile(mUsers.toJSONObject());
-                AlertBox.display("Saved", "The data has been saved.");
-                refresh();
-            }
-            catch(Exception ex){
-                ex.printStackTrace();
-                AlertBox.display("Save Failed", "The data was unsuccessful saved. Please try again.");
-            }
-        });
-        return cSaveButton;
     }
 
     // Loads/sorts data and keep data current
@@ -393,7 +427,7 @@ public class HomeScene extends AbstractScene{
                 yAxis2.setUpperBound(maxTotal); 
             
                 NumberAxis xAxis2 = new NumberAxis();
-                xAxis2.setLabel("Time in Months");
+                xAxis2.setLabel("Months in year");
 
                 xAxis2.setLowerBound(minDate.getMonthValue());
                 xAxis2.setUpperBound(maxDate.getMonthValue()); 
@@ -420,10 +454,8 @@ public class HomeScene extends AbstractScene{
             XYChart.Series<Number, Number> dataSeries = new XYChart.Series<>();
             dataSeries.setName("Account Balance over Time");
             double currentTotal = 0.0;
-            // Need to reverse because as of now, the newest dates are at the top of the list
-            // This would throw of the currentTotal if not tempary reversed.
-            Collections.reverse(mAccount.getTransactionsWorkingList());
-            for (Transaction t : mAccount.getTransactionsWorkingList()) {
+
+            for (Transaction t : (mAccount.getTransactionsWorkingList())) {
                 LocalDate date = t.getDateAsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 currentTotal += t.getAmount();
                 if(dateTickUnit != 12){
@@ -477,7 +509,7 @@ public class HomeScene extends AbstractScene{
                     spentString = "Extra Saved";
                 }
                 ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(  
-                    new PieChart.Data("Budgeted", budget.getBudgeted()),
+                    new PieChart.Data("Remaining", budget.getBudgeted() - budget.getSpent()),
                     new PieChart.Data(spentString, budget.getSpent())
                 );
                 mPie.setData(pieChartData);
@@ -549,7 +581,5 @@ public class HomeScene extends AbstractScene{
             });
             Collections.reverse(mAccount.getTransactionsWorkingList());
         }
-    }
-    
-    
+    } 
 }

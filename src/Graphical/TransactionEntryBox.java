@@ -6,6 +6,7 @@ import java.util.Date;
 
 import Helper.GeneralHelper;
 import User.Transaction;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -36,6 +37,7 @@ public class TransactionEntryBox {
         
         // Create a VBox container with some padding
         VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10, 5, 10, 5));
         
         Label introLabel = new Label("Please enter transaction information");
 
