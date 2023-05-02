@@ -3,10 +3,6 @@ package User;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
 import Helper.GeneralHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,20 +16,8 @@ public class Account {
     private ObservableList<Transaction> mTransactions = FXCollections.observableArrayList();
     private ObservableList<Transaction> mTransactionsWorkingList = FXCollections.observableArrayList();
     private ObservableList<Budget> mBudgets = FXCollections.observableArrayList();
-    
-    private static Account single_instance = null;
-  
-    // Static method
-    // Static method to create instance of Singleton class
-    public static Account getInstance()
-    {
-        if (single_instance == null)
-            single_instance = new Account();
-  
-        return single_instance;
-    }
 
-    private Account(){}
+    public Account(){}
 
     /**
      * Primarily for testing. 
@@ -72,11 +56,11 @@ public class Account {
         return tStringBuilderWorkingVar.toString();
     }
 
-    public String getName() {
+    public String getAccountName() {
         return this.mName;
     }
 
-    public void setName(String pName) {
+    public void setAccountName(String pName) {
         this.mName = pName;
     }
 
@@ -161,48 +145,6 @@ public class Account {
         return tSum;
     }
     
-    public void SetUserAccountFromJSONObject(JSONObject jsonObject) {
-        try{
-            JSONParser parser = new JSONParser();
-            JSONObject accountData = (JSONObject) parser.parse(jsonObject.toJSONString());
-
-            this.mName = (String) accountData.get("AccountName");
-
-            // No clue why, but this fixes an error.
-            this.mAccountNumber = ((Long) accountData.get("AccountNumber")).intValue();
-        
-            // Getting transaction data from JSONObject
-            JSONArray transactionData = (JSONArray) accountData.get("Transactions");
-            this.mTransactions.clear();
-            for(int i = 0; i < transactionData.size(); i++) {
-                JSONObject transactionObj = (JSONObject) transactionData.get(i);
-                String tDate = (String) transactionObj.get("Date");
-                String tPayee = (String) transactionObj.get("Payee");
-                String tCategory = (String) transactionObj.get("Category");
-                String tNote = (String) transactionObj.get("Note");
-                double tAmount = (Double) transactionObj.get("Amount");
-                Transaction tTransaction = new Transaction(tDate, tPayee, tCategory, tNote, tAmount);
-                this.mTransactions.add(tTransaction);
-            }
-            
-            // Getting budget data from JSONObject
-            JSONArray budgetData = (JSONArray) accountData.get("Budgets");
-            this.mBudgets.clear();
-            for(int i = 0; i < budgetData.size(); i++) {
-                JSONObject budgetObj = (JSONObject) budgetData.get(i);
-                String tCategory = (String) budgetObj.get("Category");
-                double tBudgeted = (Double) budgetObj.get("Budgeted");
-                double tSpent = (Double) budgetObj.get("Spent");
-                Budget tBudget = new Budget(tCategory, tBudgeted, tSpent);
-                this.mBudgets.add(tBudget);
-            }
-        }
-        catch(Exception e){
-            System.out.println("An error has occured: " + e.getMessage());
-            System.out.println("Stack Trace: " + e.getStackTrace());
-        }
-    }
-
     public Budget getBudgetByBudgetCode(String pBudgetCode){
         // Users fault currently if they create more then one budget with the same code. 
         List<Budget> budgets = new ArrayList<Budget>();

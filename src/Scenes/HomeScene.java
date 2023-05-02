@@ -16,6 +16,7 @@ import Stages.MainStage;
 import User.Account;
 import User.Budget;
 import User.Transaction;
+import User.Users;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -56,7 +57,8 @@ import javafx.scene.layout.VBox;
  */
 public class HomeScene extends AbstractScene{
 
-    private Account mAccount = Account.getInstance();
+    private Account mAccount;
+    private Users mUsers= Users.getInstance();
     private PieChart mPie;
     private LineChart mGraph;
     Label cAccountBalanceLabel = new Label("");
@@ -72,8 +74,9 @@ public class HomeScene extends AbstractScene{
 
     @Override
     public void initialize() {
+        mAccount = Users.getInstance().getCurrentUser().getCurrentAccount();
         mAccount.getBudgetByBudgetCode("");
-        Label cAccountNameLabel = new Label("Account Name: " + mAccount.getName());
+        Label cAccountNameLabel = new Label("Account Name: " + mAccount.getAccountName());
         Label cAccountNumberLabel = new Label("Account Number: " + mAccount.getAccountNumber());
 
         VBox cSceneLeftLayout = new VBox(20);
@@ -130,7 +133,7 @@ public class HomeScene extends AbstractScene{
                 mAccount.addTransaction(tTransaction);
                 mAccount.setTransactionsWorkingListByBudgetCode("");
                 updateBudgetBalances();
-                FileHelper.writeJSONFile(mAccount.toJSONObject());
+                FileHelper.writeJSONFile(mUsers.toJSONObject());
                 if(mAccount.getTransactionsWorkingList() != null && mAccount.getTransactionsWorkingList().size() > 2) {
                     cSceneLeftLayout.getChildren().remove(mGraph);
                     mGraph = updateGraph();
@@ -206,7 +209,7 @@ public class HomeScene extends AbstractScene{
                 tBudgetEntryBox.display();
                 Budget tBudget = tBudgetEntryBox.getBudget();
                 mAccount.addBudget(tBudget);
-                FileHelper.writeJSONFile(mAccount.toJSONObject());
+                FileHelper.writeJSONFile(mUsers.toJSONObject());
 
                 // This is where I update/call check on the pie chart, or maybe in the update budget balances actually... that is later though
                 
@@ -301,7 +304,7 @@ public class HomeScene extends AbstractScene{
         Button cSaveButton = new Button("Save");
         cSaveButton.setOnAction(e -> {
             try{
-                FileHelper.writeJSONFile(mAccount.toJSONObject());
+                FileHelper.writeJSONFile(mUsers.toJSONObject());
                 AlertBox.display("Saved", "The data has been saved.");
                 refresh();
             }

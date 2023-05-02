@@ -4,36 +4,25 @@ import org.json.simple.JSONObject;
 import Graphical.AlertBox;
 import Helper.FileHelper;
 import Scenes.HomeScene;
-import Scenes.NewAccountScene;
+import Scenes.LoginScene;
+import Scenes.SignUpScene;
 import Stages.MainStage;
-import User.Account;
+import User.Users;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
  
 public class App extends Application {
-    NewAccountScene mNewScene = NewAccountScene.getInstance();
-    Scene tNewScene;
+    SignUpScene mSignUpScene = SignUpScene.getInstance();
+    Scene signupScene;
     HomeScene tHomeScene = HomeScene.getInstance();
 
     @Override
     public void start(Stage pStage) {
         MainStage.getInstance().setStage(pStage);
-        mNewScene.initialize();
-        tNewScene = mNewScene.getCurrentScene();
-        // Make starting scene with login or create an account
-        // LaunchLoginPrompt();
-        // Pass int to list being account number selected
+        mSignUpScene.initialize();
         CalculateStartingScene();
         MainStage.getInstance().show();
-    }
-    public void LaunchLoginPrompt(){
-        // We want to launch the login screen
-        // The login screen should have a username and password option or a create account button.
-        // If login is entered then we need to launch an accounts window
-        // Then an account can be selected just like before, we could potentially implement a back button as well.
-        // Back button must clear account/user selection
-        // Classes needed Login page, CreateAccount page, User with Accounts list
     }
  
     public void CalculateStartingScene(){
@@ -46,17 +35,13 @@ public class App extends Application {
                 // Reading file into JSONObject
                 JSONObject tTempObject = FileHelper.readJSONFile();
 
-                // Getting instance of singleton class
-                Account tAccount = Account.getInstance();
+                Users.getInstance().fromJSONObject(tTempObject);
 
-                // Setting account from JSON Object, now we can work with the account from anywhere.
-                // Make sure this logic is set after user creates new account as well.
-                tAccount.SetUserAccountFromJSONObject(tTempObject);
-
-                tHomeScene.initialize();
+                LoginScene loginScene = LoginScene.getInstance();
+                loginScene.initialize();
 
                 // If that works then set scene
-                MainStage.getInstance().setScene(tHomeScene.getCurrentScene());
+                MainStage.getInstance().setScene(loginScene.getCurrentScene());
             }
             catch(Exception e){
                 AlertBox.display("Error", "Error reading file, a new account will need to be made.");
@@ -65,11 +50,11 @@ public class App extends Application {
                     FileHelper.deleteFile();
                 }
                 e.printStackTrace();
-                MainStage.getInstance().setScene(tNewScene);
+                MainStage.getInstance().setScene(mSignUpScene.getCurrentScene());
             }
         }
         else{
-            MainStage.getInstance().setScene(tNewScene);
+            MainStage.getInstance().setScene(mSignUpScene.getCurrentScene());
         }
     }
  public static void main(String[] args) {

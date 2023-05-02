@@ -3,6 +3,7 @@ package Scenes;
 import Graphical.AlertBox;
 import Stages.MainStage;
 import User.Account;
+import User.Users;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -14,7 +15,7 @@ import javafx.scene.layout.VBox;
  */
 public class NewAccountScene extends AbstractScene{
 
-    private Account mAccount = Account.getInstance();
+    private Account mAccount = Users.getInstance().getCurrentUser().getCurrentAccount();
     private static final NewAccountScene INSTANCE = new NewAccountScene();
 
     protected NewAccountScene(){
@@ -45,7 +46,6 @@ public class NewAccountScene extends AbstractScene{
 
         vbox.getChildren().addAll(nameLabel, nameField, numberLabel, numberField, createButton);
     
-        // Add an action listener to the "Create" button to handle errors and create the account
         createButton.setOnAction(e -> {
             String name = nameField.getText();
             String numberText = numberField.getText();
@@ -60,7 +60,7 @@ public class NewAccountScene extends AbstractScene{
             try {
                 int number = Integer.parseInt(numberText);
                 mAccount.setAccountNumber(number);
-                mAccount.setName(name);
+                mAccount.setAccountName(name);
                 HomeScene.getInstance().initialize();
                 MainStage.getInstance().setScene(HomeScene.getInstance().getCurrentScene());
                 MainStage.getInstance().show();

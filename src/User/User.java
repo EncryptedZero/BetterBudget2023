@@ -3,6 +3,7 @@ package User;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import javax.crypto.SecretKeyFactory;
@@ -10,19 +11,10 @@ import javax.crypto.spec.PBEKeySpec;
 
 public class User {
     private String mUsername, mSalt, mPassword;
+    private Account mCurrentAccount;
     private List<Account> mAccounts = new ArrayList<Account>();
 
-    private static User instance;
-
-    private User() {
-    }
-
-    public static User getInstance() {
-        if (instance == null) {
-            instance = new User();
-        }
-        return instance;
-    }
+    public User(){}
 
     public void CreateUser(String pUsername, String pPassword) {
         this.mUsername = pUsername;
@@ -34,13 +26,13 @@ public class User {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);
-        this.mSalt = salt.toString();
+        this.mSalt = Base64.getEncoder().encodeToString(salt);
 
         try {
-            KeySpec spec = new PBEKeySpec(mPassword.toCharArray(), salt, 65536, 128);
+            KeySpec spec = new PBEKeySpec(mPassword.toCharArray(), Base64.getDecoder().decode(mSalt), 65536, 128);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             byte[] hash = factory.generateSecret(spec).getEncoded();
-            mPassword = hash.toString();
+            this.mPassword = Base64.getEncoder().encodeToString(hash);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,10 +41,10 @@ public class User {
     public boolean isPassword(String pPasswordAttempt){
         boolean isPassword = false;
         try {
-            KeySpec spec = new PBEKeySpec(pPasswordAttempt.toCharArray(), mSalt.getBytes(), 65536, 128);
+            KeySpec spec = new PBEKeySpec(pPasswordAttempt.toCharArray(), Base64.getDecoder().decode(mSalt), 65536, 128);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             byte[] hash = factory.generateSecret(spec).getEncoded();
-            String tHashedPasswordAttempt = hash.toString();
+            String tHashedPasswordAttempt = Base64.getEncoder().encodeToString(hash);
             if(tHashedPasswordAttempt.equals(mPassword)){
                 isPassword = true;
             }
@@ -85,6 +77,26 @@ public class User {
             return "";
         }
         return mPassword;
+    }
+
+    public void setUsername(String pUsername){
+        this.mUsername = pUsername;
+    }
+
+    public void setPassword(String pPassword){
+        this.mPassword = pPassword;
+    }
+
+    public void setSalt(String pSalt){
+        this.mSalt = pSalt;
+    }
+
+    public Account getCurrentAccount(){
+        return this.mCurrentAccount;
+    }
+    
+    public void setCurrentAccount(Account pCurrentAccount){
+        this.mCurrentAccount = pCurrentAccount;
     }
 
     public List<Account> getAccounts(){
